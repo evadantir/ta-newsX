@@ -4,3 +4,4 @@ stanford-corenlp-python/
 
 #ignore workspace
 Workspace TA.code-workspace
+.vscode/settings.json

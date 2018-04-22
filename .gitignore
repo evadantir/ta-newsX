@@ -1,0 +1,6 @@
+#ignore folder
+news_crawler/
+stanford-corenlp-python/
+
+#ignore workspace
+Workspace TA.code-workspace

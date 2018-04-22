@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#credits to: SolrBeam
+#credits to: ElSolrBeam
 import string, re
 import nltk
 from nltk.collocations import *
@@ -8,7 +8,8 @@ from nltk import ngrams
 class Preprocess():
 	"""docstring for Preprocess"""
 	def __init__(self):
-		self.stopword = map(str.strip, open("library/stopword.txt","r").readlines())
+		# self.stopword = map(str.strip, open("library/stopword.txt","r").readlines())
+		pass
 
 	def eliminateStopword(self, string):
 		splitString = string.split()
@@ -18,21 +19,22 @@ class Preprocess():
 				result.append(word)
 		return ' '.join(result)
 
-	def eliminatePunctuation(self, inputString, is_name=False):
+	# def eliminatePunctuation(self, inputString, is_name=False):
 		
-		if is_name == True:
-			punctuation = string.punctuation.replace("-","").replace("\'","")
-		else:
-			punctuation = string.punctuation.replace("-","")
+	# 	if is_name == True:
+	# 		punctuation = string.punctuation.replace("-","").replace("\'","")
+	# 	else:
+	# 		punctuation = string.punctuation.replace("-","")
 
-		for char in punctuation:
-			inputString = inputString.replace(char,"").replace("  "," ") # temporary spacing change
+	# 	for char in punctuation:
+	# 		inputString = inputString.replace(char,"").replace("  "," ") # temporary spacing change
 
-		return inputString
+	# 	return inputString
 		# return inputString.translate(None, string.punctuation.replace("-",""))
 
 	def tokenizeString(self, rawString):
 		return nltk.word_tokenize(self.eliminatePunctuation(rawString.lower()))
+		# return nltk.word_tokenize(rawString)
 
 	def customizeSub(self, matchObj):
 		matchString = matchObj.group(0)

@@ -1,6 +1,11 @@
 #ignore folder
-news_crawler/
+news_crawler/page_contents_extracted/
+news_crawler/page_contents_raw/
+news_crawler/page_links/
 stanford-corenlp-python/
+node_modules/
+page_contents_extracted.rar
+package-lock.json
 
 #ignore workspace
 Workspace TA.code-workspace

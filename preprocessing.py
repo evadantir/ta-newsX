@@ -2,8 +2,8 @@
 #credits to: ElSolrBeam
 import string, re
 import nltk
-from nltk.collocations import *
-from nltk import ngrams
+# from nltk.collocations import *
+# from nltk import ngrams
 
 class Preprocess():
 	"""docstring for Preprocess"""

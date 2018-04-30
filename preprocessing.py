@@ -11,13 +11,13 @@ class Preprocess():
 		# self.stopword = map(str.strip, open("library/stopword.txt","r").readlines())
 		pass
 
-	def eliminateStopword(self, string):
-		splitString = string.split()
-		result = []
-		for word in splitString:
-			if word not in self.stopword:
-				result.append(word)
-		return ' '.join(result)
+	# def eliminateStopword(self, string):
+	# 	splitString = string.split()
+	# 	result = []
+	# 	for word in splitString:
+	# 		if word not in self.stopword:
+	# 			result.append(word)
+	# 	return ' '.join(result)
 
 	# def eliminatePunctuation(self, inputString, is_name=False):
 		
@@ -32,8 +32,8 @@ class Preprocess():
 	# 	return inputString
 		# return inputString.translate(None, string.punctuation.replace("-",""))
 
-	def tokenizeString(self, rawString):
-		return nltk.word_tokenize(self.eliminatePunctuation(rawString.lower()))
+	# def tokenizeString(self, rawString):
+	# 	return nltk.word_tokenize(self.eliminatePunctuation(rawString.lower()))
 		# return nltk.word_tokenize(rawString)
 
 	def customizeSub(self, matchObj):

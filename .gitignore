@@ -3,6 +3,7 @@ news_crawler/page_contents_extracted/
 news_crawler/page_contents_raw/
 news_crawler/page_links/
 stanford-corenlp-python/
+stanford-corenlp-full-2018-02-27/
 node_modules/
 page_contents_extracted.rar
 package-lock.json

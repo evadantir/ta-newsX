@@ -24,6 +24,7 @@ class CombineNews(object):
                     temp = data.append(json_result, ignore_index=True)
                     temp['body'] = self.cleansingText(temp['body'])
                     temp['title'] = self.cleansingText(temp['title'])
+                    temp = temp.dropna(axis=1,how="any")
                     data = temp
 
         data.to_csv('combined.csv',sep=';', encoding='utf-8')

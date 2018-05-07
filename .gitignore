@@ -11,3 +11,4 @@ package-lock.json
 #ignore workspace
 Workspace TA.code-workspace
 .vscode/settings.json
+*.pyc

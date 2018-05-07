@@ -1,11 +1,39 @@
 # -*- coding: utf-8 -*-
-
+from stanfordcorenlp import StanfordCoreNLP
 from tokenization import *
 
 class ExtractEntity(object):
 
     def extractNewsSentence(self,text):
         return sentence_extraction(text);
+
+    def coreNLP(self,text,type="ner"):
+        if(ner):
+            return nlp.ner(sentence)
+        else:
+            return nlp.
+
+
+    def orgPhraseChunking(self,ner):
+	ent_list = []
+	temp = []
+
+	for entity in ner:
+		if(entity[1] == 'ORGANIZATION'):
+			temp.append(entity[0])
+		else:
+			if len(temp) > 0:
+				ent_list.append(" ".join(temp))
+				temp = []
+
+	return ent_list
+
+    def extractLoc(self,text):
+        sentence = self.extractNewsSentence(text)
+        ne_lists = {'LOCATION': [], 'DATE': [], 'TIME': [], 'TIME+DATE': []}
+
+        for sent in sentence:
+            if 
 
 ex = ExtractEntity()
 

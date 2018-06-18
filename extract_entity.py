@@ -7,7 +7,7 @@ class ExtractEntity(object):
     def extractNewsSentence(self,text):
         return sentence_extraction(text);
 
-    def coreNLP(self,text,type="ner"):
+    def coreNLP(self,text):
         if(ner):
             return nlp.ner(sentence)
         else:
@@ -28,12 +28,19 @@ class ExtractEntity(object):
 
 	return ent_list
 
-    def extractLoc(self,text):
-        sentence = self.extractNewsSentence(text)
-        ne_lists = {'LOCATION': [], 'DATE': [], 'TIME': [], 'TIME+DATE': []}
+    def calculateFeature(self,text):
+        feature = {}
+        num_occur_text 
+        num_occur_head
+        ent_pos
+        ent_type
 
-        for sent in sentence:
-            if 
+    # def extractLoc(self,text):
+        # sentence = self.extractNewsSentence(text)
+        # ne_lists = {'LOCATION': [], 'DATE': [], 'TIME': [], 'TIME+DATE': []}
+
+        # for sent in sentence:
+        #     if 
 
 ex = ExtractEntity()
 

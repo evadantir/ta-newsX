@@ -2,6 +2,7 @@
 #credits to: ElSolrBeam
 import string, re
 import nltk
+from tokenization import *
 # from nltk.collocations import *
 # from nltk import ngrams
 
@@ -18,6 +19,10 @@ class Preprocess():
 	# 		if word not in self.stopword:
 	# 			result.append(word)
 	# 	return ' '.join(result)
+
+	def removeWhitespaces(self,text):
+		temp = text.strip()
+		return " ".join(temp.split())
 
 	def eliminatePunctuation(self, inputString, is_name=False):
 		
@@ -51,6 +56,7 @@ class Preprocess():
 
 		# remove fckin unwanted characters
 		text = re.sub(r'[^\x00-\x7f]',r'', text)
+		text = self.removeWhitespaces(text)
 
 		if not is_entity:
 			# give space to space one sentence with another

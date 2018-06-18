@@ -33,7 +33,7 @@ class ExtractIntNews(object):
         #     temp['content'] = data['content'].apply(lambda x: self.cleansingText(x))
         
         #save filtered data to CSV
-        temp.to_csv(filesave,sep=';', encoding='utf-8')
+        temp.to_csv(filesave,sep=';', encoding='utf-8', index=False)
         print "done"
 
     def cleansingCNN(self, data):

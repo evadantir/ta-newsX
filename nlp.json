@@ -1,0 +1,391 @@
+{
+    "Coref": [
+        {
+            "head": "Taylor Swift",
+            "mentions": []
+        },
+        {
+            "head": "Manchester 's",
+            "mentions": []
+        },
+        {
+            "head": "Manchester 's ` incredible resilience ' after bombing",
+            "mentions": []
+        },
+        {
+            "head": "US",
+            "mentions": []
+        },
+        {
+            "head": "first",
+            "mentions": []
+        },
+        {
+            "head": "UK",
+            "mentions": []
+        },
+        {
+            "head": "Ariana Grande",
+            "mentions": []
+        },
+        {
+            "head": "The US singer",
+            "mentions": [
+                "She"
+            ]
+        },
+        {
+            "head": "the crowd",
+            "mentions": []
+        },
+        {
+            "head": "Manchester City 's Etihad Stadium - the first UK show of her Reputation tour -",
+            "mentions": []
+        },
+        {
+            "head": "the first UK show of her Reputation tour",
+            "mentions": []
+        },
+        {
+            "head": "her Reputation tour",
+            "mentions": []
+        },
+        {
+            "head": "the victims of last year 's terror attack at the end of an Ariana Grande concert",
+            "mentions": [
+                "those victims"
+            ]
+        },
+        {
+            "head": "last year 's",
+            "mentions": []
+        },
+        {
+            "head": "the end of an Ariana Grande concert",
+            "mentions": []
+        },
+        {
+            "head": "an Ariana Grande concert",
+            "mentions": []
+        },
+        {
+            "head": "You",
+            "mentions": [
+                "you"
+            ]
+        }
+    ],
+    "NER": [
+        [
+            {
+                "ner": "PERSON",
+                "word": "Taylor"
+            },
+            {
+                "ner": "PERSON",
+                "word": "Swift"
+            },
+            {
+                "ner": "O",
+                "word": "praises"
+            },
+            {
+                "ner": "ORGANIZATION",
+                "word": "Manchester"
+            },
+            {
+                "ner": "O",
+                "word": "'s"
+            },
+            {
+                "ner": "O",
+                "word": "`"
+            },
+            {
+                "ner": "O",
+                "word": "incredible"
+            },
+            {
+                "ner": "O",
+                "word": "resilience"
+            },
+            {
+                "ner": "O",
+                "word": "'"
+            },
+            {
+                "ner": "O",
+                "word": "after"
+            },
+            {
+                "ner": "CRIMINAL_CHARGE",
+                "word": "bombing"
+            },
+            {
+                "ner": "O",
+                "word": "."
+            }
+        ],
+        [
+            {
+                "ner": "O",
+                "word": "The"
+            },
+            {
+                "ner": "COUNTRY",
+                "word": "US"
+            },
+            {
+                "ner": "TITLE",
+                "word": "singer"
+            },
+            {
+                "ner": "O",
+                "word": "told"
+            },
+            {
+                "ner": "O",
+                "word": "the"
+            },
+            {
+                "ner": "O",
+                "word": "crowd"
+            },
+            {
+                "ner": "O",
+                "word": "at"
+            },
+            {
+                "ner": "CITY",
+                "word": "Manchester"
+            },
+            {
+                "ner": "LOCATION",
+                "word": "City"
+            },
+            {
+                "ner": "LOCATION",
+                "word": "'s"
+            },
+            {
+                "ner": "LOCATION",
+                "word": "Etihad"
+            },
+            {
+                "ner": "LOCATION",
+                "word": "Stadium"
+            },
+            {
+                "ner": "O",
+                "word": "-"
+            },
+            {
+                "ner": "O",
+                "word": "the"
+            },
+            {
+                "ner": "ORDINAL",
+                "word": "first"
+            },
+            {
+                "ner": "COUNTRY",
+                "word": "UK"
+            },
+            {
+                "ner": "O",
+                "word": "show"
+            },
+            {
+                "ner": "O",
+                "word": "of"
+            },
+            {
+                "ner": "O",
+                "word": "her"
+            },
+            {
+                "ner": "O",
+                "word": "Reputation"
+            },
+            {
+                "ner": "O",
+                "word": "tour"
+            },
+            {
+                "ner": "O",
+                "word": "-"
+            },
+            {
+                "ner": "O",
+                "word": "that"
+            },
+            {
+                "ner": "O",
+                "word": "the"
+            },
+            {
+                "ner": "O",
+                "word": "victims"
+            },
+            {
+                "ner": "O",
+                "word": "of"
+            },
+            {
+                "ner": "DATE",
+                "word": "last"
+            },
+            {
+                "ner": "DATE",
+                "word": "year"
+            },
+            {
+                "ner": "O",
+                "word": "'s"
+            },
+            {
+                "ner": "O",
+                "word": "terror"
+            },
+            {
+                "ner": "CAUSE_OF_DEATH",
+                "word": "attack"
+            },
+            {
+                "ner": "O",
+                "word": "at"
+            },
+            {
+                "ner": "O",
+                "word": "the"
+            },
+            {
+                "ner": "O",
+                "word": "end"
+            },
+            {
+                "ner": "O",
+                "word": "of"
+            },
+            {
+                "ner": "O",
+                "word": "an"
+            },
+            {
+                "ner": "PERSON",
+                "word": "Ariana"
+            },
+            {
+                "ner": "PERSON",
+                "word": "Grande"
+            },
+            {
+                "ner": "O",
+                "word": "concert"
+            },
+            {
+                "ner": "O",
+                "word": "would"
+            },
+            {
+                "ner": "O",
+                "word": "never"
+            },
+            {
+                "ner": "O",
+                "word": "be"
+            },
+            {
+                "ner": "O",
+                "word": "forgotten"
+            },
+            {
+                "ner": "O",
+                "word": "."
+            }
+        ],
+        [
+            {
+                "ner": "O",
+                "word": "She"
+            },
+            {
+                "ner": "O",
+                "word": "said"
+            },
+            {
+                "ner": "O",
+                "word": ":"
+            },
+            {
+                "ner": "O",
+                "word": "``"
+            },
+            {
+                "ner": "O",
+                "word": "You"
+            },
+            {
+                "ner": "O",
+                "word": "'ve"
+            },
+            {
+                "ner": "O",
+                "word": "shown"
+            },
+            {
+                "ner": "O",
+                "word": "that"
+            },
+            {
+                "ner": "O",
+                "word": "you"
+            },
+            {
+                "ner": "O",
+                "word": "'re"
+            },
+            {
+                "ner": "O",
+                "word": "never"
+            },
+            {
+                "ner": "O",
+                "word": "going"
+            },
+            {
+                "ner": "O",
+                "word": "to"
+            },
+            {
+                "ner": "O",
+                "word": "let"
+            },
+            {
+                "ner": "O",
+                "word": "anyone"
+            },
+            {
+                "ner": "O",
+                "word": "forget"
+            },
+            {
+                "ner": "O",
+                "word": "about"
+            },
+            {
+                "ner": "O",
+                "word": "those"
+            },
+            {
+                "ner": "O",
+                "word": "victims"
+            },
+            {
+                "ner": "O",
+                "word": "."
+            }
+        ]
+    ],
+    "Text": "Taylor Swift praises Manchester's 'incredible resilience' after bombing. The US singer told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour - that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten.\n She said: \"You've shown that you're never going to let anyone forget about those victims.\n"
+}

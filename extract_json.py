@@ -90,22 +90,21 @@ class ExtractFeaturesValue(object):
         for i in range(len(entities)):
             for sent in sent_list:
                 match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent.lower())
-                # if entities[i]["entity"] in sent:
                 if match:
-                    count += 1
-                entities[i]["count"] = count
-                count = 0
+                    count += len(match)
+                entities[i]["occ_text"] = count
+            count = 0
 
         return entities
     
     def findOuccurencesInTitle(self,title,list_entity):
 
         for i in range(len(entities)):
-            occ_title = 0
+            occ_title = False
 
             match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',title.lower())
             if match:
-                occ_title = 1
+                occ_title = True
             entities[i]["occ_title"] = occ_title
 
         return entities
@@ -123,7 +122,7 @@ class ExtractFeaturesValue(object):
 
 e = ExtractFeaturesValue()
 
-data = e.loadJSON("nlp.json")
+data = e.loadJSON("nlp1.json")
 entities = e.extractEntityFromJSON(data["NER"])
 entities = e.countOccurencesInText(data["Text"],entities)
 entities = e.findOuccurencesInTitle(data["Title"],entities)

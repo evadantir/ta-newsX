@@ -1,6 +1,8 @@
 import json
 import pandas as pd
 from pprint import pprint
+from nltk.tokenize import sent_tokenize
+import re
 
 class ExtractFeaturesValue(object):
 
@@ -83,8 +85,30 @@ class ExtractFeaturesValue(object):
     # count entity's occurences from text manually
     def countOccurencesInText(self,text,list_entity):
         count = 0
-        # for ent in list_entity:
-        #     if 
+        sent_list = sent_tokenize(text)
+
+        for i in range(len(entities)):
+            for sent in sent_list:
+                match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent.lower())
+                # if entities[i]["entity"] in sent:
+                if match:
+                    count += 1
+                entities[i]["count"] = count
+                count = 0
+
+        return entities
+    
+    def findOuccurencesInTitle(self,title,list_entity):
+
+        for i in range(len(entities)):
+            occ_title = 0
+
+            match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',title.lower())
+            if match:
+                occ_title = 1
+            entities[i]["occ_title"] = occ_title
+
+        return entities
 
     #--count entity's occurences in text from coref -- NOT USED
     def extractCoRef(self,data):
@@ -99,9 +123,10 @@ class ExtractFeaturesValue(object):
 
 e = ExtractFeaturesValue()
 
-data = e.loadJSON("nlp1.json")
+data = e.loadJSON("nlp.json")
 entities = e.extractEntityFromJSON(data["NER"])
-
+entities = e.countOccurencesInText(data["Text"],entities)
+entities = e.findOuccurencesInTitle(data["Title"],entities)
 test = pd.DataFrame(entities)
 
 print test

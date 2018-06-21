@@ -142,11 +142,17 @@ class ExtractFeaturesValue(object):
 
 e = ExtractFeaturesValue()
 
+# find feature in one text
 data = e.loadJSON("nlp1.json")
+
 entities = e.extractEntityFromJSON(data["NER"])
 entities = e.countOccurencesInText(data["Text"],entities)
 entities = e.findOuccurencesInTitle(data["Title"],entities)
 entities = e.findDistribution(data["Text"],entities)
-test = pd.DataFrame(entities)
 
-# print test
+feature = pd.DataFrame(entities)
+
+# convert to excel
+excel = pd.ExcelWriter('test.xlsx',engine='xlsxwriter')
+feature.to_excel(excel,sheet_name='Sheet1',index=False)
+excel.save()

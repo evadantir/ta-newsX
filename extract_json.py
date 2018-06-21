@@ -84,19 +84,19 @@ class ExtractFeaturesValue(object):
 
     # count entity's occurences from text manually
     def countOccurencesInText(self,text,list_entity):
-        count = 0
         sent_list = sent_tokenize(text)
 
         for i in range(len(entities)):
+            count = 0
             for sent in sent_list:
                 match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent.lower())
                 if match:
                     count += len(match)
                 entities[i]["occ_text"] = count
-            count = 0
 
         return entities
     
+    # find entity's occurence in text's title
     def findOuccurencesInTitle(self,title,list_entity):
 
         for i in range(len(entities)):
@@ -120,12 +120,33 @@ class ExtractFeaturesValue(object):
         temp = cf_morethanone + cf_unique
         temp = pd.DataFrame(temp)
 
+    # find entities distribution in one text
+    def findDistribution(self,data,entities):
+        sent_list = sent_tokenize(data)
+
+        #for every entities
+        for i in range(len(entities)):
+            dist = 0
+            #for every sentences
+            for j in range(len(sent_list)):
+                #find how many times entities found in each sentence
+                match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent_list[j].lower())
+                if match:
+                    # n of entity in sentence * index of sentences
+                    dist  = dist + (len(match)*(j+1))
+            
+            # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
+            entities[i]["dist"] = float(dist / entities[i]["occ_text"])
+
+        return entities
+
 e = ExtractFeaturesValue()
 
 data = e.loadJSON("nlp1.json")
 entities = e.extractEntityFromJSON(data["NER"])
 entities = e.countOccurencesInText(data["Text"],entities)
 entities = e.findOuccurencesInTitle(data["Title"],entities)
+entities = e.findDistribution(data["Text"],entities)
 test = pd.DataFrame(entities)
 
-print test
+# print test

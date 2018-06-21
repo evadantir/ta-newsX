@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-def train(dataset,news_element):
+def train(dataset,news_element,test):
     #classifier algorithm
     clf = RandomForestClassifier()
 
@@ -20,15 +20,16 @@ def train(dataset,news_element):
     # training
     clf.fit(X, y)
 
-    # testing predicted value
-    test = np.array([1, 1, 1, 1])
     result = clf.predict([test])
 
     return result
 
 
 df = pd.read_excel('test.xlsx', sheet_name='Sheet1')
-who = train(df,'where')
-where = train(df,'who')
+
+# testing predicted value
+test = np.array([1, 1, 1, 1])
+who = train(df,'where',test)
+where = train(df,'who',test)
 
 print who

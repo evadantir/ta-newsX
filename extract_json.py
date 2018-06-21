@@ -6,12 +6,50 @@ import re
 
 class ExtractFeaturesValue(object):
 
+    # Remove name which is a substring to other name, e.g. [Novanto, Setya Novanto, Prabowo]
+    # becomes [Setya Novanto, Prabowo]
+    def sieveSubstring(self, string_list):
+        string_list.sort(key=lambda s: len(s), reverse=True)
+        out = []
+        for s in string_list:
+            if not any([s in o for o in out]):
+                out.append(s)
+        return out
+
     #load json file
-    def loadJSON(self,filename):
+    def loadJSON(self, filename):
         with open(filename) as file:
             data = json.load(file)
 
         return data
+
+    # remove duplicate value in list of entities
+    def removeDuplicateListDict(self,listdict):
+        seen = set()
+        new_list = []
+        for dictionary in listdict:
+            t = tuple(dictionary.items())
+            if t not in seen:
+                seen.add(t)
+                new_list.append(dictionary)
+
+        return new_list
+
+    def extractDateFromJSON(self,data):
+        list_date = []
+
+        for ner in data:
+            date = []
+            for sent in ner:
+                if sent["ner"] == 'DATE':
+                    date.append(sent["word"])
+                else:
+                    if date != []:
+                        list_date.append(' '.join(date))
+                        date = []
+
+        list_date = self.sieveSubstring(list_date)
+        return list_date
 
     # -- find out entity's type then extract it
     def extractEntityFromJSON(self,data):
@@ -69,18 +107,6 @@ class ExtractFeaturesValue(object):
         entities = list_loc + list_person + list_org
 
         return entities
-
-    # remove duplicate value in list of entities
-    def removeDuplicateListDict(self,listdict):
-        seen = set()
-        new_list = []
-        for dictionary in listdict:
-            t = tuple(dictionary.items())
-            if t not in seen:
-                seen.add(t)
-                new_list.append(dictionary)
-
-        return new_list
 
     # count entity's occurences from text manually
     def countOccurencesInText(self,text,list_entity):
@@ -145,14 +171,17 @@ e = ExtractFeaturesValue()
 # find feature in one text
 data = e.loadJSON("nlp1.json")
 
-entities = e.extractEntityFromJSON(data["NER"])
-entities = e.countOccurencesInText(data["Text"],entities)
-entities = e.findOuccurencesInTitle(data["Title"],entities)
-entities = e.findDistribution(data["Text"],entities)
+# entities = e.extractEntityFromJSON(data["NER"])
+# entities = e.countOccurencesInText(data["Text"],entities)
+# entities = e.findOuccurencesInTitle(data["Title"],entities)
+# entities = e.findDistribution(data["Text"],entities)
 
-feature = pd.DataFrame(entities)
+# feature = pd.DataFrame(entities)
 
-# convert to excel
-excel = pd.ExcelWriter('test.xlsx',engine='xlsxwriter')
-feature.to_excel(excel,sheet_name='Sheet1',index=False)
-excel.save()
+# # convert to excel
+# excel = pd.ExcelWriter('test.xlsx',engine='xlsxwriter')
+# feature.to_excel(excel,sheet_name='Sheet1',index=False)
+# excel.save()
+
+date = e.extractDateFromJSON(data["NER"])
+print date

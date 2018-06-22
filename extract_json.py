@@ -1,20 +1,13 @@
 import json
 import pandas as pd
-from pprint import pprint
 from nltk.tokenize import sent_tokenize
 import re
+from preprocessing import Preprocess
 
 class ExtractFeaturesValue(object):
 
-    # Remove name which is a substring to other name, e.g. [Novanto, Setya Novanto, Prabowo]
-    # becomes [Setya Novanto, Prabowo]
-    def sieveSubstring(self, string_list):
-        string_list.sort(key=lambda s: len(s), reverse=True)
-        out = []
-        for s in string_list:
-            if not any([s in o for o in out]):
-                out.append(s)
-        return out
+    def __init__(self):
+        self.pre = Preprocess()
 
     #load json file
     def loadJSON(self, filename):
@@ -22,34 +15,6 @@ class ExtractFeaturesValue(object):
             data = json.load(file)
 
         return data
-
-    # remove duplicate value in list of entities
-    def removeDuplicateListDict(self,listdict):
-        seen = set()
-        new_list = []
-        for dictionary in listdict:
-            t = tuple(dictionary.items())
-            if t not in seen:
-                seen.add(t)
-                new_list.append(dictionary)
-
-        return new_list
-
-    def extractDateFromJSON(self,data):
-        list_date = []
-
-        for ner in data:
-            date = []
-            for sent in ner:
-                if sent["ner"] == 'DATE':
-                    date.append(sent["word"])
-                else:
-                    if date != []:
-                        list_date.append(' '.join(date))
-                        date = []
-
-        list_date = self.sieveSubstring(list_date)
-        return list_date
 
     # -- find out entity's type then extract it
     def extractEntityFromJSON(self,data):
@@ -100,16 +65,16 @@ class ExtractFeaturesValue(object):
                     #empty dictionary
                     tempdict = {}
 
-        list_loc = self.removeDuplicateListDict(list_loc)
-        list_person = self.removeDuplicateListDict(list_person)
-        list_org = self.removeDuplicateListDict(list_org)
+        list_loc = self.pre.removeDuplicateListDict(list_loc)
+        list_person = self.pre.removeDuplicateListDict(list_person)
+        list_org = self.pre.removeDuplicateListDict(list_org)
 
         entities = list_loc + list_person + list_org
 
         return entities
 
     # count entity's occurences from text manually
-    def countOccurencesInText(self,text,list_entity):
+    def countOccurencesInText(self,text,entities):
         sent_list = sent_tokenize(text)
 
         for i in range(len(entities)):
@@ -123,7 +88,7 @@ class ExtractFeaturesValue(object):
         return entities
     
     # find entity's occurence in text's title
-    def findOuccurencesInTitle(self,title,list_entity):
+    def findOuccurencesInTitle(self,title,entities):
 
         for i in range(len(entities)):
             occ_title = False
@@ -166,22 +131,29 @@ class ExtractFeaturesValue(object):
 
         return entities
 
+    def extractFeatures(self,filename):
+
+        data = self.loadJSON(filename)
+
+        entities = self.extractEntityFromJSON(data["NER"])
+        entities = self.countOccurencesInText(data["Text"],entities)
+        entities = self.findOuccurencesInTitle(data["Title"],entities)
+        entities = self.findDistribution(data["Text"],entities)
+
+        feature = pd.DataFrame(entities)
+
+        return feature
+
+    def convertToExcel(self,filename,data):
+        # convert to excel
+        excel = pd.ExcelWriter(filename,engine='xlsxwriter')
+        data.to_excel(excel,sheet_name='Sheet1',index=False)
+        excel.save()
+
+        print filename + " successfully saved as Excel file!"
+
 e = ExtractFeaturesValue()
 
-# find feature in one text
-data = e.loadJSON("nlp1.json")
-
-# entities = e.extractEntityFromJSON(data["NER"])
-# entities = e.countOccurencesInText(data["Text"],entities)
-# entities = e.findOuccurencesInTitle(data["Title"],entities)
-# entities = e.findDistribution(data["Text"],entities)
-
-# feature = pd.DataFrame(entities)
-
-# # convert to excel
-# excel = pd.ExcelWriter('test.xlsx',engine='xlsxwriter')
-# feature.to_excel(excel,sheet_name='Sheet1',index=False)
-# excel.save()
-
-date = e.extractDateFromJSON(data["NER"])
-print date
+# find feature in one text and save it to excel
+data = e.extractFeatures("nlp1.json")
+e.convertToExcel("test123.xlsx",data)

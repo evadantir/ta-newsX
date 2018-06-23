@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from stanfordcorenlp import StanfordCoreNLP
 from preprocessing import Preprocess
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize,word_tokenize
 from nltk.parse.stanford import StanfordParser
-from nltk.tag.stanford import StanfordNERTagger
+from nltk.tag import StanfordNERTagger
 from nltk.tree import *
 import re
 
@@ -14,34 +14,39 @@ class Find5W1H(object):
         # self.nlp = StanfordCoreNLP(r'./stanford-corenlp-full-2018-02-27',memory='5g')
         # self.annotate = self.getConstituencyParsing()
 
+    # parsing for getting verb phrase
     def getConstituencyParsing(self,text):
-        # annotate = self.nlp.parse(text) 
-        # self.nlp.close()
-        
-        scp = StanfordParser('./stanford-parser.jar','./stanford-parser-3.9.1-models.jar')
+        scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
         return scp.raw_parse(text)
-
+        
     def getNER(self,text):
 
+        list_sentence = sent_tokenize(text)
+        ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
+        ner = []
+        for sent in list_sentence:
+            words = word_tokenize(sent)
+            ner.append(ner_tagger.tag(words))
+        
+        return ner
 
-    # def extractDateFromText(self,data):
+    def extractDateFromText(self,data):
 
-        # list_date = []
+        list_date = []
 
-        # date = []
-        # for sent in list_sentence:
-        #     if sent["ner"] == 'DATE':
-        #         date.append(sent["word"])
-        #     else:
-        #         if date != []:
-        #             list_date.append(' '.join(date))
-        #             date = []
+        date = []
+        for sent in data:
+            for ner in sent:
+                if ner[1] == 'DATE':
+                    date.append(ner[0])
+                else:
+                    if date != []:
+                        list_date.append(' '.join(date))
+                        date = []
 
-        # list_date = self.pre.sieveSubstring(list_date)
+        list_date = self.pre.sieveSubstring(list_date)
 
-        # self.nlp.close()
-
-        # return list_date
+        return list_date
 
     # extracting what element from text -- LOGIC STILL NEEDED TO BE APPROVED
     def extractWhatFromText(self,who,title,text):
@@ -69,7 +74,9 @@ class Find5W1H(object):
 fd = Find5W1H()
 
 title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
-text="Taylor Swift told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour - that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said: \"You've shown that you're never going to let anyone forget about those victims.\""
+# text="Taylor Swift told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour - that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said: \"You've shown that you're never going to let anyone forget about those victims.\""
 who = "Taylor Swift"
-
-print fd.extractWhatFromText(who,title,text)
+text = "At least 39 people were killed and at least 69 wounded in an attack in a nightclub early Sunday as they were celebrating the new year, Turkey's Interior Minister said."
+# print fd.extractWhatFromText(who,title,text)
+ner = fd.getNER(text)
+print fd.extractDateFromText(ner)

@@ -98,7 +98,7 @@ class Find5W1H(object):
                     matched_key.append(reg)
 
             # check if what is in sentence
-            match = re.findall(r'\b'+re.escape(what.lower()) + r'\b',sent.lower())
+            match = re.findall(r'\b' + what.lower() + r'\b',sent.lower())
             if match:
                 # check with WHAT(.*)to/TO(.*)/VB rule
                 pos = self.getPOS(sent)
@@ -108,14 +108,14 @@ class Find5W1H(object):
                             rule = ('(WHAT(.*)to/TO(.*)/VB)',0.5)
                             matched_key.append(rule)
                 # check with (WHAT(.*)will) rule
-                checked = re.findall('will',sent.lower())
+                checked = re.findall(r'\b'+re.escape('will') + r'\b',sent.lower())
                 if checked:
                     rule = ('(WHAT(.*)will)',0.5)
                     matched_key.append(rule)
-            
+                    
             #store all reason list found from one text in  container
             if matched_key != []:
-                why['sentence'] = list(set(sent))
+                why['sentence'] = sent
                 why['keys'] = list(set(matched_key))
                 why['total_confidence'] = sum([value[1] for value in why['keys']])
                 why_candidates.append(why)
@@ -148,12 +148,12 @@ fd = Find5W1H()
 title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
 text="Taylor Swift told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour - that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."
 who = "Taylor Swift"
-what = "praises Manchester's 'incredible resilience' after bombing."
-test = "She said it because she thinks that they will never going to let anyone forget about those victims"
+what = "Taylor Swift praises Manchester's 'incredible resilience' after bombing."
+test = "Taylor Swift praises Manchester's 'incredible resilience' after bombing she said it because she thinks that they will never going to let anyone forget about those victims"
 # text = "At least 39 people were killed and at least 69 wounded in an attack in a nightclub early Sunday as they were celebrating the new year, Turkey's Interior Minister said."
 # print fd.extractWhatFromText(who,title,text)
 # ner = fd.getNER(text)
 # print fd.extractDateFromText(ner)
 # print fd.getPOS(what)
-print fd.extractWhyFromText(what,text)
+print fd.extractWhyFromText(what,test)
 # print fd.extractHowFromText(who,what,text)

@@ -22,10 +22,12 @@ class ExtractFeaturesValue(object):
         list_person = []
         list_loc = []
         list_org = []
+        list_misc = []
 
         for ner in data:
             # temporary array for person/org/loc composed from >1 word
             person = []
+            misc = []
             tempdict = {}
             org = []
             loc = []
@@ -38,6 +40,8 @@ class ExtractFeaturesValue(object):
                     org.append(sent["word"])
                 elif (sent["ner"] == 'LOCATION') or (sent["ner"] == 'COUNTRY') or (sent["ner"] == 'CITY'):
                     loc.append(sent["word"])
+                elif sent["ner"] == 'MISC':
+                    misc.append(sent["word"])
                 #if it's not one of them...
                 else:
                     #check if there's temp array that's not emptied yet 
@@ -61,15 +65,21 @@ class ExtractFeaturesValue(object):
                         list_loc.append(tempdict)
                         #empty temp array
                         loc = []
-                    
+                    if misc != []:
+                        tempdict["entity"] = ' '.join(misc)
+                        tempdict["type"] = "MISC"
+                        list_misc.append(tempdict)
+                        #empty temp array
+                        misc = []
                     #empty dictionary
                     tempdict = {}
 
         list_loc = self.pre.removeDuplicateListDict(list_loc)
         list_person = self.pre.removeDuplicateListDict(list_person)
         list_org = self.pre.removeDuplicateListDict(list_org)
+        list_misc = self.pre.removeDuplicateListDict(list_misc)
 
-        entities = list_loc + list_person + list_org
+        entities = list_loc + list_person + list_org + list_misc
 
         return entities
 
@@ -155,5 +165,5 @@ class ExtractFeaturesValue(object):
 e = ExtractFeaturesValue()
 
 # find feature in one text and save it to excel
-data = e.extractFeatures("nlp1.json")
+data = e.extractFeatures("./Java Program/nlp1.json")
 e.convertToExcel("test123.xlsx",data)

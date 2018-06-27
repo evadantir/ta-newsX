@@ -1,8 +1,8 @@
 from pprint import pprint
 import joblib
 
-blah = joblib.load('text_blah.pkl')
-pprint(blah)
-# for bh in blah['ner']:
-#     if bh[0] == 'Really':
-#         print bh
+blah = joblib.load('nlp_object/cnn_1.pkl')
+# pprint(blah)
+print blah['coref']
+for cf in blah['coref']:
+    print cf['main']

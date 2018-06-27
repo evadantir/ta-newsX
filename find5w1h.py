@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from stanfordcorenlp import StanfordCoreNLP
 from preprocessing import Preprocess
+from newsentity_extractor import NewsEntityExtractor
 from nltk.tokenize import sent_tokenize,word_tokenize
 from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
@@ -12,31 +12,7 @@ class Find5W1H(object):
 
     def __init__(self):
         self.pre = Preprocess()
-        # self.nlp = StanfordCoreNLP(r'./stanford-corenlp-full-2018-02-27',memory='5g')
-        # self.annotate = self.getConstituencyParsing()
-
-    # parsing for getting verb phrase
-    def getConstituencyParsing(self,text):
-        scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
-        return scp.raw_parse(text)
-
-    def getNER(self,text):
-
-        list_sentence = sent_tokenize(text)
-        ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
-        ner = []
-        for sent in list_sentence:
-            words = word_tokenize(sent)
-            ner.append(ner_tagger.tag(words))
-
-        return ner
-
-    def getPOS(self,text):
-        pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
-        words = word_tokenize(text)
-        pos = pos_tagger.tag(words)
-
-        return pos
+        self.nex = NewsEntityExtractor()
 
     def extractDateFromText(self,data):
 
@@ -61,7 +37,7 @@ class Find5W1H(object):
         # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
         match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',title.lower())
         if match:
-            anno = list(self.getConstituencyParsing(title))
+            anno = list(self.nex.getConstituencyParsing(title))
             # returning verb phrase from title
             for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
                 return ' '.join(sub_tree.leaves())
@@ -73,7 +49,7 @@ class Find5W1H(object):
                 match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',sent.lower())
                 if match:
                     # getting verb phrase
-                    anno = list(self.getConstituencyParsing(sent))
+                    anno = list(self.nex.getConstituencyParsing(sent))
                     break
             # returning verb phrase from text
             for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
@@ -101,7 +77,7 @@ class Find5W1H(object):
             match = re.findall(r'\b' + what.lower() + r'\b',sent.lower())
             if match:
                 # check with WHAT(.*)to/TO(.*)/VB rule
-                pos = self.getPOS(sent)
+                pos = self.nex.getPOS(sent)
                 for i in range(len(pos)):
                     if pos[i][1] == 'TO':
                         if pos[i+1][1] == 'VB':

@@ -3,12 +3,15 @@ import joblib
 import pandas as pd
 from nltk.tokenize import sent_tokenize
 import re
+import os
 from preprocessing import Preprocess
+from newsentity_extractor import NewsEntityExtractor
 
 class ExtractFeaturesValue(object):
 
     def __init__(self):
         self.pre = Preprocess()
+        self.nex = NewsEntityExtractor()
 
     #load json file
     def loadJSON(self, filename):
@@ -156,7 +159,7 @@ class ExtractFeaturesValue(object):
         return entities
 
     # count entity's occurences from text manually
-    def countOccurencesInText(self,text,entities):
+    def countManOccurencesInText(self,text,entities):
         sent_list = sent_tokenize(text)
 
         for i in range(len(entities)):
@@ -168,9 +171,35 @@ class ExtractFeaturesValue(object):
                 entities[i]["occ_text"] = count
 
         return entities
-    
+
+    def findNounPhraseFromTitle(self,title,entities):
+        anno = list(self.nex.getConstituencyParsing(title))
+
+        # returning verb phrase from title
+        temp = {}
+        for sub_tree in anno[0].subtrees(lambda t: t.label() == 'NP'):
+            temp['entity'] = (' '.join(sub_tree.leaves()))
+            temp['type'] = 'NP'
+            entities.append(temp)
+        
+        return entities
+
+    def countCfOccurencesInText(self,entities,coref):
+        # if "main" entity in coref extraction is the same with named entities from ner process, then unite it
+        for i in range(len(entities)):
+            count = 1
+            for cf in coref:
+                if cf['main'] in entities[i]['entity']:
+                    count = 0
+                    count += len(cf['mentions'])
+                    entities[i]['occ_text'] = count
+                else:
+                    entities[i]['occ_text'] = count
+
+        return entities
+
     # find entity's occurence in text's title
-    def findOuccurencesInTitle(self,title,entities):
+    def findOccurencesInTitle(self,title,entities):
 
         for i in range(len(entities)):
             occ_title = False
@@ -218,29 +247,30 @@ class ExtractFeaturesValue(object):
         data = self.loadJSON(filename)
 
         entities = self.extractEntityFromJSON(data["NER"])
-        entities = self.countOccurencesInText(data["Text"],entities)
-        entities = self.findOuccurencesInTitle(data["Title"],entities)
+        entities = self.countManOccurencesInText(data["Text"],entities)
+        entities = self.findOccurencesInTitle(data["Title"],entities)
         entities = self.findDistribution(data["Text"],entities)
 
         feature = pd.DataFrame(entities)
 
         return feature
 
+    # combine all the module so we can extract features from pickle object
     def extractFeaturesFromPickle(self,filename):
 
         data = self.loadPickle(filename)
-        print data
-        exit()
         entities = self.extractEntityFromPickle(data["ner"])
-        entities = self.countOccurencesInText(data["text"],entities)
-        entities = self.findOuccurencesInTitle(data["text"][0],entities)
-        entities = self.findDistribution(data["Text"],entities)
+        entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
+        entities = self.countCfOccurencesInText(entities,data["coref"])
+        entities = self.findOccurencesInTitle(data["title"],entities)
+        entities = self.findDistribution(data["text"],entities)
 
         feature = pd.DataFrame(entities)
 
         return feature
 
     def convertToExcel(self,filename,data):
+        import xlsxwriter
         # convert to excel
         excel = pd.ExcelWriter(filename,engine='xlsxwriter')
         data.to_excel(excel,sheet_name='Sheet1',index=False)
@@ -251,7 +281,10 @@ class ExtractFeaturesValue(object):
 e = ExtractFeaturesValue()
 
 # find feature in one text and save it to excel
-# data = e.extractFeaturesFromJSON("./Java Program/nlp1.json")
-data = e.extractFeaturesFromPickle("nlp_object/cnn_1.pkl")
-print data
-# e.convertToExcel("test123.xlsx",data)
+path = "./nlp_object/"
+filelist = os.listdir(path)
+
+for file in filelist:
+    data = e.extractFeaturesFromPickle(os.path.join(path, file))
+    e.convertToExcel("test123.xlsx",data)
+

@@ -55,16 +55,19 @@ class NewsEntityExtractor(object):
 
         return coref_list
 
-    def extractNerCoref(self, text):
-        ner = self.getNER(text)
-        print "NER extraction completed"
+    def extractNerCoref(self, text,title):
+        # ner = self.getNER(text)
+        # print "NER extraction completed"
         coref = self.getCoref(text)
         print "Coref extraction completed"
         nlp_dict = {
+            'title' : title,
             'text' : text,
-            'ner' : ner,
+            # 'ner' : ner,
             'coref' : coref
         }
+        print nlp_dict['title']
+        exit()
         return nlp_dict
 
     def saveObject(self, nlp_dict, filename):
@@ -74,10 +77,24 @@ class NewsEntityExtractor(object):
         joblib.dump(nlp_dict, os.path.join(folder, name))
         print "Inserted text from file " + filename + " with index " + str(self.count)
 
+    def extractFromNews(self,dataset):
+        # print dataset['title']
+        # for news in dataset:
+        #     print news[1]
+            # exit()
+        combine = dataset['title'] + ' ' + dataset['content']
+            # print combine
+            # exit()
+        for ds in combine:
+            print ds
+        # self.saveObject(self.extractNerCoref(combine,dataset['title']),'cnn')
+        print "Done extracting from news"
+
 se = NewsEntityExtractor()
 filename = "Java Program/ta eva/cnn.csv"
 dataset = se.loadData(filename)
-dataset['content'].apply(lambda x: se.saveObject(se.extractNerCoref(x), 'cnn'))
+# dataset['content'].apply(lambda x: se.saveObject(se.extractNerCoref(x), 'cnn'))
+se.extractFromNews(dataset)
 
 # filename = "nlp_object/cnn_1"
 # se.readObject(filename)

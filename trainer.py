@@ -1,35 +1,47 @@
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+import joblib
 
-def train(dataset,news_element,test):
-    #classifier algorithm
-    clf = RandomForestClassifier()
+class Trainer(object):
+    def convertToNumeric(self,dataset):
+        # convert categorical feature to numeric
+        dataset['type'] = dataset['type'].map({'PERSON': 1, 'LOCATION': 2, 'ORGANIZATION': 3,'NP': 4}).astype(int)
+        dataset['occ_title'] = dataset['occ_title'].map({False: 0, True: 1}).astype(int)
+        return dataset
 
-    # extract feature needed
-    dataset = dataset.drop(['entity',news_element], axis=1)
+    def train(self,dataset,news_element):
+        #classifier algorithm
+        clf = RandomForestClassifier()
 
-    # convert categorical feature to numeric
-    dataset['type'] = dataset['type'].map({'PERSON': 1, 'LOCATION': 2, 'ORGANIZATION': 3}).astype(int)
-    dataset['occ_title'] = dataset['occ_title'].map({False: 0, True: 1}).astype(int)
+        # extract feature needed, drop entity
+        dataset = dataset.drop(['entity',news_element], axis=1)
+        # print dataset
+        # exit()
 
-    # determine wich column is feature or label
-    X = dataset.iloc[:,:-1]
-    y = dataset.iloc[:,-1]
+        dataset = self.convertToNumeric(dataset)
 
-    # training
-    clf.fit(X, y)
+        # determine wich column is feature or label
+        X = dataset.iloc[:,:-1]
+        y = dataset.iloc[:,-1]
+        print X
+        print y
+        exit()
 
-    result = clf.predict([test])
+        if news_element == 'who':    
+            # training and save into pickle
+            joblib.dump(clf.fit(X, y),'model/train_who.pkl')
+            print "Model for WHERE has been saved"
+        elif news_element == 'where':
+            # training and save into pickle
+            joblib.dump(clf.fit(X, y),'model/train_where.pkl')
+            print "Model for WHO has been saved"
 
-    return result
+tr = Trainer()
 
+df = pd.read_excel('test123.xlsx', sheet_name='Sheet1')
 
-df = pd.read_excel('test.xlsx', sheet_name='Sheet1')
+# training model for detecting who and where
+tr.train(df,'where')
 
-# testing predicted value
-test = np.array([1, 1, 1, 1])
-who = train(df,'where',test)
-where = train(df,'who',test)
-
-print who
+# tr.train(df,'who')

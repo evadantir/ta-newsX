@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from preprocessing import Preprocess
 from newsentity_extractor import NewsEntityExtractor
+from extract_feature import ExtractFeaturesValue
 from nltk.tokenize import sent_tokenize,word_tokenize
 from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
 from nltk.tag import StanfordPOSTagger
 from nltk.tree import *
+import numpy as np
 import re
 
 class Find5W1H(object):
@@ -13,6 +15,38 @@ class Find5W1H(object):
     def __init__(self):
         self.pre = Preprocess()
         self.nex = NewsEntityExtractor()
+        self.exf = ExtractFeaturesValue()
+
+    # def predictEntity(self,filename,testval):
+    #     model = exf.loadModel(filename)
+
+    #     result = model.predict([testval])
+    #     return result
+
+    def extractWhoOrWhere(self,text,title,ml):
+        model = self.exf.loadModel(ml)
+        data = self.nex.extractNerCoref(text,title)
+        features = self.exf.extractFeaturesDirectFromText(data)
+        features = self.convertToNumeric(features)
+        
+        predict_who = model.predict(features.drop('entity', axis=1))
+
+        # buat tes doang
+        # predict_who = np.array([1,0,1,0])
+
+        candidate = []
+        for i in range(len(predict_who)):
+            if predict_who[i] == 1:
+                # insert who candidate to list
+                candidate.append(features.iloc[i,1])
+
+        return candidate
+    
+    def convertToNumeric(self,dataset):
+        # convert categorical feature to numeric
+        dataset['type'] = dataset['type'].map({'PERSON': 1, 'LOCATION': 2, 'ORGANIZATION': 3,'NP': 4}).astype(int)
+        dataset['occ_title'] = dataset['occ_title'].map({False: 0, True: 1}).astype(int)
+        return dataset
 
     def extractDateFromText(self,data):
 
@@ -118,18 +152,34 @@ class Find5W1H(object):
             how_candidate.append(how)
 
         return how_candidate
+    
+    def extract5w(self,text,title):
+        entity = self.nex.extractNerCoref(text,title)
+        who_model = "./model/train_who.pkl"
+        where_model = "./model/train_where.pkl"
+
+        result_dict = {
+            "who" : self.extractWhoOrWhere(text,title,who_model),
+            'where' : self.extractWhoOrWhere(text,title,where_model),
+            'what' : self.extractWhatFromText(who,title,text),
+            'when' : self.extractDateFromText(entity),
+            'why' : self.extractWhyFromText(what,text)
+        }
+        
+        return result_dict
 
 fd = Find5W1H()
 
 title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
 text="Taylor Swift told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour - that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."
-who = "Taylor Swift"
-what = "Taylor Swift praises Manchester's 'incredible resilience' after bombing."
-test = "Taylor Swift praises Manchester's 'incredible resilience' after bombing she said it because she thinks that they will never going to let anyone forget about those victims"
+# who = "Taylor Swift"
+# what = "Taylor Swift praises Manchester's 'incredible resilience' after bombing."
+# test = "Taylor Swift praises Manchester's 'incredible resilience' after bombing she said it because she thinks that they will never going to let anyone forget about those victims"
 # text = "At least 39 people were killed and at least 69 wounded in an attack in a nightclub early Sunday as they were celebrating the new year, Turkey's Interior Minister said."
 # print fd.extractWhatFromText(who,title,text)
 # ner = fd.getNER(text)
 # print fd.extractDateFromText(ner)
 # print fd.getPOS(what)
-print fd.extractWhyFromText(what,test)
+# print fd.extractWhyFromText(what,test)
+print fd.extract5w(text, title)
 # print fd.extractHowFromText(who,what,text)

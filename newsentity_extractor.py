@@ -81,8 +81,8 @@ class NewsEntityExtractor(object):
         dataset = se.loadData(file_open)
         dataset.apply(lambda x: se.saveObject(se.extractNerCoref(x['content'], x['title']), file_close), axis=1)
 
-se = NewsEntityExtractor()
-file_open = "Java Program/ta eva/cnn.csv"
-file_close = 'cnn'
+# se = NewsEntityExtractor()
+# file_open = "Java Program/ta eva/cnn_guardian.csv"
+# file_close = 'news'
 # se.extractNews(file_open,file_close)
 

@@ -6,6 +6,7 @@ import re
 import os
 from preprocessing import Preprocess
 from newsentity_extractor import NewsEntityExtractor
+import openpyxl
 
 class ExtractFeaturesValue(object):
 
@@ -20,7 +21,7 @@ class ExtractFeaturesValue(object):
 
         return data
 
-    def loadPickle(self,filename):
+    def loadModel(self,filename):
         pkl = joblib.load(filename)
         return pkl
 
@@ -92,7 +93,7 @@ class ExtractFeaturesValue(object):
         return entities
 
     # -- find out entity's type then extract it
-    def extractEntityFromPickle(self,data):
+    def extractEntity(self,data):
         # list of extracted people,loc, organization entities from text
         list_person = []
         list_loc = []
@@ -223,7 +224,7 @@ class ExtractFeaturesValue(object):
         temp = pd.DataFrame(temp)
 
     # find entities distribution in one text
-    def findDistribution(self,data,entities):
+    def findDistribution(self, data, entities):
         sent_list = sent_tokenize(data)
 
         #for every entities
@@ -236,10 +237,16 @@ class ExtractFeaturesValue(object):
                 if match:
                     # n of entity in sentence * index of sentences
                     dist  = dist + (len(match)*(j+1))
+                    # print "len",len(match)
+                    # print "j+1",j+1
+                    # print "match",len(match)*(j+1)
+            
+            if dist == 0:
+                print entities[i]
             
             # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
             entities[i]["dist"] = float(dist / entities[i]["occ_text"])
-
+        
         return entities
 
     def extractFeaturesFromJSON(self,filename):
@@ -258,8 +265,8 @@ class ExtractFeaturesValue(object):
     # combine all the module so we can extract features from pickle object
     def extractFeaturesFromPickle(self,filename):
 
-        data = self.loadPickle(filename)
-        entities = self.extractEntityFromPickle(data["ner"])
+        data = self.loadModel(filename)
+        entities = self.extractEntity(data["ner"])
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
         entities = self.countCfOccurencesInText(entities,data["coref"])
         entities = self.findOccurencesInTitle(data["title"],entities)
@@ -269,22 +276,34 @@ class ExtractFeaturesValue(object):
 
         return feature
 
+    def extractFeaturesDirectFromText(self,data):
+        entities = self.extractEntity(data["ner"])
+        entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
+        entities = self.countCfOccurencesInText(entities,data["coref"])
+        entities = self.findOccurencesInTitle(data["title"],entities)
+        entities = self.findDistribution(data["text"],entities)
+
+        feature = pd.DataFrame(entities)
+        return feature
+
     def convertToExcel(self,filename,data):
         import xlsxwriter
         # convert to excel
-        excel = pd.ExcelWriter(filename,engine='xlsxwriter')
+        excel = pd.ExcelWriter(filename,engine='openpyxl')
         data.to_excel(excel,sheet_name='Sheet1',index=False)
         excel.save()
 
         print filename + " successfully saved as Excel file!"
 
-e = ExtractFeaturesValue()
+# e = ExtractFeaturesValue()
 
-# find feature in one text and save it to excel
-path = "./nlp_object/"
-filelist = os.listdir(path)
-
-for file in filelist:
-    data = e.extractFeaturesFromPickle(os.path.join(path, file))
-    e.convertToExcel("test123.xlsx",data)
+# # find feature in one text and save it to excel
+# path = "./nlp_object/"
+# filelist = os.listdir(path)
+# idx = 0
+# data = pd.DataFrame()
+# for file in filelist:
+#     temp = e.extractFeaturesFromPickle(os.path.join(path, file))
+#     data = data.append(temp)
+#     e.convertToExcel("entities.xlsx",data)
 

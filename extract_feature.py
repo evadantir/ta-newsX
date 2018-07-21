@@ -241,8 +241,8 @@ class ExtractFeaturesValue(object):
                     # print "j+1",j+1
                     # print "match",len(match)*(j+1)
             
-            if dist == 0:
-                print entities[i]
+            # if dist == 0:
+            #     print entities[i]
             
             # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
             entities[i]["dist"] = float(dist / entities[i]["occ_text"])

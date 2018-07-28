@@ -26,74 +26,74 @@ class ExtractFeaturesValue(object):
         return pkl
 
     # -- find out entity's type then extract it
-    def extractEntityFromJSON(self,data):
-        # list of extracted people,loc, organization entities from text
-        list_person = []
-        list_loc = []
-        list_org = []
-        list_misc = []
+    # def extractEntityFromJSON(self,data):
+    #     # list of extracted people,loc, organization entities from text
+    #     list_person = []
+    #     list_loc = []
+    #     list_org = []
+    #     list_misc = []
 
-        for ner in data:
-            # temporary array for person/org/loc composed from >1 word
-            person = []
-            misc = []
-            tempdict = {}
-            org = []
-            loc = []
-            # looping for in each of sentences
-            for sent in ner:
-                # check if entity is person/loc/org. if found save it in temp array
-                if sent["ner"] == 'PERSON':  
-                    person.append(sent["word"])
-                elif sent["ner"] == 'ORGANIZATION':
-                    org.append(sent["word"])
-                elif (sent["ner"] == 'LOCATION') or (sent["ner"] == 'COUNTRY') or (sent["ner"] == 'CITY'):
-                    loc.append(sent["word"])
-                elif sent["ner"] == 'MISC':
-                    misc.append(sent["word"])
-                #if it's not one of them...
-                else:
-                    #check if there's temp array that's not emptied yet 
-                    if person != []:
-                        tempdict["entity"] = ' '.join(person)
-                        tempdict["type"] = "PERSON"
-                        list_person.append(tempdict)
-                        #empty temp array
-                        person = []
-                    # if 
-                    if org != []:
-                        tempdict["entity"] = ' '.join(org)
-                        tempdict["type"] = "ORGANIZATION"
-                        list_org.append(tempdict)
-                        #empty temp array
-                        org = []
-                    # if
-                    if loc != []:
-                        tempdict["entity"] = ' '.join(loc)
-                        tempdict["type"] = "LOCATION"
-                        list_loc.append(tempdict)
-                        #empty temp array
-                        loc = []
-                    if misc != []:
-                        tempdict["entity"] = ' '.join(misc)
-                        tempdict["type"] = "MISC"
-                        list_misc.append(tempdict)
-                        #empty temp array
-                        misc = []
-                    #empty dictionary
-                    tempdict = {}
+    #     for ner in data:
+    #         # temporary array for person/org/loc composed from >1 word
+    #         person = []
+    #         misc = []
+    #         tempdict = {}
+    #         org = []
+    #         loc = []
+    #         # looping for in each of sentences
+    #         for sent in ner:
+    #             # check if entity is person/loc/org. if found save it in temp array
+    #             if sent["ner"] == 'PERSON':  
+    #                 person.append(sent["word"])
+    #             elif sent["ner"] == 'ORGANIZATION':
+    #                 org.append(sent["word"])
+    #             elif (sent["ner"] == 'LOCATION') or (sent["ner"] == 'COUNTRY') or (sent["ner"] == 'CITY'):
+    #                 loc.append(sent["word"])
+    #             elif sent["ner"] == 'MISC':
+    #                 misc.append(sent["word"])
+    #             #if it's not one of them...
+    #             else:
+    #                 #check if there's temp array that's not emptied yet 
+    #                 if person != []:
+    #                     tempdict["entity"] = ' '.join(person)
+    #                     tempdict["type"] = "PERSON"
+    #                     list_person.append(tempdict)
+    #                     #empty temp array
+    #                     person = []
+    #                 # if 
+    #                 if org != []:
+    #                     tempdict["entity"] = ' '.join(org)
+    #                     tempdict["type"] = "ORGANIZATION"
+    #                     list_org.append(tempdict)
+    #                     #empty temp array
+    #                     org = []
+    #                 # if
+    #                 if loc != []:
+    #                     tempdict["entity"] = ' '.join(loc)
+    #                     tempdict["type"] = "LOCATION"
+    #                     list_loc.append(tempdict)
+    #                     #empty temp array
+    #                     loc = []
+    #                 if misc != []:
+    #                     tempdict["entity"] = ' '.join(misc)
+    #                     tempdict["type"] = "MISC"
+    #                     list_misc.append(tempdict)
+    #                     #empty temp array
+    #                     misc = []
+    #                 #empty dictionary
+    #                 tempdict = {}
 
-        list_loc = self.pre.removeDuplicateListDict(list_loc)
-        list_person = self.pre.removeDuplicateListDict(list_person)
-        list_org = self.pre.removeDuplicateListDict(list_org)
-        list_misc = self.pre.removeDuplicateListDict(list_misc)
+    #     list_loc = self.pre.removeDuplicateListDict(list_loc)
+    #     list_person = self.pre.removeDuplicateListDict(list_person)
+    #     list_org = self.pre.removeDuplicateListDict(list_org)
+    #     list_misc = self.pre.removeDuplicateListDict(list_misc)
 
-        entities = list_loc + list_person + list_org + list_misc
+    #     entities = list_loc + list_person + list_org + list_misc
 
-        return entities
+    #     return entities
 
     # -- find out entity's type then extract it
-    def extractEntity(self,data):
+    def extractEntity(self,idx,data):
         # list of extracted people,loc, organization entities from text
         list_person = []
         list_loc = []
@@ -188,13 +188,17 @@ class ExtractFeaturesValue(object):
     def countCfOccurencesInText(self,entities,coref):
         # if "main" entity in coref extraction is the same with named entities from ner process, then unite it
         for i in range(len(entities)):
+            # jumlah default kemunculan suatu entity,minimal 1 kali muncul
             count = 1
             for cf in coref:
+                # hasil coref: {'main': entity, 'mentions': [...,..,...]}
+                # jika ternyata dari hasil coref (coref['main']) ada entity yang sama dengan entity dari ner, maka jumlah kemunculan entity ditambahkan dengan jumlah entity dari coref (coref['mention'])  
                 if cf['main'] in entities[i]['entity']:
                     count = 0
                     count += len(cf['mentions'])
                     entities[i]['occ_text'] = count
                 else:
+                    # jika tidak ada, maka jumlah kemunculan entity itu sesuai dengan jumlah defaultnya
                     entities[i]['occ_text'] = count
 
         return entities
@@ -249,34 +253,44 @@ class ExtractFeaturesValue(object):
         
         return entities
 
-    def extractFeaturesFromJSON(self,filename):
+    # def extractFeaturesFromJSON(self,filename):
 
-        data = self.loadJSON(filename)
+    #     data = self.loadJSON(filename)
 
-        entities = self.extractEntityFromJSON(data["NER"])
-        entities = self.countManOccurencesInText(data["Text"],entities)
-        entities = self.findOccurencesInTitle(data["Title"],entities)
-        entities = self.findDistribution(data["Text"],entities)
+    #     entities = self.extractEntityFromJSON(data["NER"])
+    #     entities = self.countManOccurencesInText(data["Text"],entities)
+    #     entities = self.findOccurencesInTitle(data["Title"],entities)
+    #     entities = self.findDistribution(data["Text"],entities)
 
-        feature = pd.DataFrame(entities)
+    #     feature = pd.DataFrame(entities)
 
-        return feature
+    #     return feature
 
     # combine all the module so we can extract features from pickle object
-    def extractFeaturesFromPickle(self,filename):
+    def extractFeaturesFromPickle(self,idx,filename):
 
+        #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
         data = self.loadModel(filename)
-        entities = self.extractEntity(data["ner"])
+        # extract entity yang ada berdasarkan data ner dari variable data
+        entities = self.extractEntity(idx,data["ner"])
+        # ambil noun phrase dari judul, lalu masukkan ke data entities, jika ternyata ada yang sama, hapus
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
+        # bandingkan entity dari coref dengan entity yang dari ner, jika ada yang sama, maka tambahkan jumlah kemunculannya dan simpan
         entities = self.countCfOccurencesInText(entities,data["coref"])
+        # cari kemunculan enity di judul
         entities = self.findOccurencesInTitle(data["title"],entities)
+        # cari nilai distribusid dari entity dalam teks
         entities = self.findDistribution(data["text"],entities)
+        # append text index
+        for entity in entities:
+            entity['id_text'] = idx
 
         feature = pd.DataFrame(entities)
 
         return feature
 
     def extractFeaturesDirectFromText(self,data):
+        
         entities = self.extractEntity(data["ner"])
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
         entities = self.countCfOccurencesInText(entities,data["coref"])
@@ -295,15 +309,14 @@ class ExtractFeaturesValue(object):
 
         print filename + " successfully saved as Excel file!"
 
-# e = ExtractFeaturesValue()
+e = ExtractFeaturesValue()
 
-# # find feature in one text and save it to excel
-# path = "./nlp_object/"
-# filelist = os.listdir(path)
-# idx = 0
-# data = pd.DataFrame()
-# for file in filelist:
-#     temp = e.extractFeaturesFromPickle(os.path.join(path, file))
-#     data = data.append(temp)
-#     e.convertToExcel("entities.xlsx",data)
+# find feature in one text and save it to excel
+path = "./nlp_object/"
+filelist = os.listdir(path)
+data = pd.DataFrame()
+for idx, file in enumerate(filelist):
+    temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
+    data = data.append(temp)
+    e.convertToExcel("entities.xlsx",data)
 

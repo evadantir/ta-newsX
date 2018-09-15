@@ -15,7 +15,7 @@ class Trainer(object):
         clf = RandomForestClassifier()
 
         # extract feature needed, drop entity
-        dataset = dataset.drop(['entity',news_element], axis=1)
+        dataset = dataset.drop(['entity','idx_text',news_element], axis=1)
         # print dataset
         # exit()
 
@@ -24,9 +24,6 @@ class Trainer(object):
         # determine wich column is feature or label
         X = dataset.iloc[:,:-1]
         y = dataset.iloc[:,-1]
-        print X
-        print y
-        exit()
 
         if news_element == 'who':    
             # training and save into pickle
@@ -39,9 +36,8 @@ class Trainer(object):
 
 tr = Trainer()
 
+# reading excel that contain features (HARUS DIKASIH KOLOM WHO DAN WHERE DULU, DAN DITENTUKAN YANG MANA WHO DAN WHERE)
 df = pd.read_excel('test123.xlsx', sheet_name='Sheet1')
-
-# training model for detecting who and where
+# training model for detecting who and where, input "where" or "who" meaning that column will be dropped (deleted)
 tr.train(df,'where')
-
-# tr.train(df,'who')
+tr.train(df,'who')

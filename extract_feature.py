@@ -21,7 +21,7 @@ class ExtractFeaturesValue(object):
 
         return data
 
-    def loadModel(self,filename):
+    def loadPickle(self,filename):
         pkl = joblib.load(filename)
         return pkl
 
@@ -93,17 +93,19 @@ class ExtractFeaturesValue(object):
     #     return entities
 
     # -- find out entity's type then extract it
-    def extractEntity(self,idx,data):
+    def extractEntity(self,data):
         # list of extracted people,loc, organization entities from text
         list_person = []
         list_loc = []
         list_org = []
-        list_misc = []
+        # list_misc = []
+        list_date = []
 
         for ner in data:
             # temporary array for person/org/loc composed from >1 word
             person = []
-            misc = []
+            date = []
+            # misc = []
             tempdict = {}
             org = []
             loc = []
@@ -116,8 +118,10 @@ class ExtractFeaturesValue(object):
                     org.append(sent[0])
                 elif (sent[1] == 'LOCATION') or (sent[1] == 'COUNTRY') or (sent[1] == 'CITY'):
                     loc.append(sent[0])
-                elif sent[1] == 'MISC':
-                    misc.append(sent[0])
+                elif sent[1] == 'DATE':
+                    date.append(sent[0])
+                # elif sent[1] == 'MISC':
+                #     misc.append(sent[0])
                 #if it's not one of them...
                 else:
                     #check if there's temp array that's not emptied yet 
@@ -141,21 +145,28 @@ class ExtractFeaturesValue(object):
                         list_loc.append(tempdict)
                         #empty temp array
                         loc = []
-                    if misc != []:
-                        tempdict["entity"] = ' '.join(misc)
-                        tempdict["type"] = "MISC"
-                        list_misc.append(tempdict)
+                    if date != []:
+                        tempdict["entity"] = ' '.join(date)
+                        tempdict["type"] = "DATE"
+                        list_date.append(tempdict)
                         #empty temp array
-                        misc = []
+                        date = []
+                    # if misc != []:
+                    #     tempdict["entity"] = ' '.join(misc)
+                    #     tempdict["type"] = "MISC"
+                    #     list_misc.append(tempdict)
+                    #     #empty temp array
+                    #     misc = []
                     #empty dictionary
                     tempdict = {}
 
         list_loc = self.pre.removeDuplicateListDict(list_loc)
         list_person = self.pre.removeDuplicateListDict(list_person)
         list_org = self.pre.removeDuplicateListDict(list_org)
-        list_misc = self.pre.removeDuplicateListDict(list_misc)
+        # list_misc = self.pre.removeDuplicateListDict(list_misc)
+        list_date = self.pre.removeDuplicateListDict(list_date)
 
-        entities = list_loc + list_person + list_org + list_misc
+        entities = list_loc + list_person + list_org + list_date
 
         return entities
 
@@ -270,9 +281,9 @@ class ExtractFeaturesValue(object):
     def extractFeaturesFromPickle(self,idx,filename):
 
         #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
-        data = self.loadModel(filename)
+        data = self.loadPickle(filename)
         # extract entity yang ada berdasarkan data ner dari variable data
-        entities = self.extractEntity(idx,data["ner"])
+        entities = self.extractEntity(data["ner"])
         # ambil noun phrase dari judul, lalu masukkan ke data entities, jika ternyata ada yang sama, hapus
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
         # bandingkan entity dari coref dengan entity yang dari ner, jika ada yang sama, maka tambahkan jumlah kemunculannya dan simpan
@@ -311,12 +322,21 @@ class ExtractFeaturesValue(object):
 
 e = ExtractFeaturesValue()
 
+data = e.loadPickle('./nlp_object/0e5fa7c0e6252bfeeea5e3840c6cb503f299c19d24331c4ba60c5974.json.pkl')
+# data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
+entities= e.extractEntity(data["ner"])
+print entities
+# print e.findNounPhraseFromTitle(data["title"],entities)
+
 # find feature in one text and save it to excel
-path = "./nlp_object/"
-filelist = os.listdir(path)
-data = pd.DataFrame()
-for idx, file in enumerate(filelist):
-    temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
-    data = data.append(temp)
-    e.convertToExcel("entities.xlsx",data)
+# path = "./nlp_object/"
+# filelist = os.listdir(path)
+# data = pd.DataFrame()
+# for idx, file in enumerate(filelist):
+#     temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
+#     data = data.append(temp)
+#     # e.convertToExcel("entities.xlsx",data)
+    
+#     # for testing only
+#     e.convertToExcel("goldendata_extracted_feature.xlsx",data)
 

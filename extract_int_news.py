@@ -37,7 +37,7 @@ class ExtractIntNews(object):
         print "done"
 
     def cleansingCNN(self, data):
-    # pola: Kota - (CNN)
+        # pola: Kota - (CNN)
         
         temp = self.cleansingText(data)
         # print 'done cleansing'
@@ -46,7 +46,7 @@ class ExtractIntNews(object):
         return temp
 
     def cleansingReuter(self, data):
-    # pola: ( )
+        # pola: ( )
 
         temp = pd.DataFrame()
         temp = self.cleansingText(data)
@@ -57,7 +57,7 @@ ex = ExtractIntNews()
 
 
 # ex.extractContentCSV('CNN.csv','CNN','cnn_only.csv')
-ex.extractContentCSV('cnn_only1.csv','CNN','cnn_edit1.csv')
+# ex.extractContentCSV('cnn_only1.csv','CNN','cnn_edit1.csv')
 # ex.extractContentCSV('Guardian.csv','Guardian','guardian_edit.csv')
 # ex.extractContentCSV('Guardian_Reuter.csv','Reuters','reuters.csv')
 # ex.extractContentCSV('reuters.csv','Reuters','reuters_edit.csv')

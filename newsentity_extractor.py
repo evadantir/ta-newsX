@@ -4,8 +4,10 @@ from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
 from nltk.tag import StanfordPOSTagger
 from nltk.tree import *
+from preprocessing import Preprocess
 import re
 import os
+import json
 import pandas as pd
 import joblib
 import en_coref_md
@@ -13,7 +15,9 @@ import en_coref_md
 class NewsEntityExtractor(object):
     def __init__(self):
         self.count = 0
+        self.pre = Preprocess()
 
+    # reading CSV 
     def loadData(self, filename):
         dataset = pd.read_csv(filename, sep=";")
         return dataset
@@ -43,7 +47,7 @@ class NewsEntityExtractor(object):
 
     def getCoref(self,text):
         nlp = en_coref_md.load()
-        doc = nlp(unicode(text,"utf-8"))
+        doc = nlp(text)
 
         coref_list = []
         for blah in doc._.coref_clusters:
@@ -55,34 +59,67 @@ class NewsEntityExtractor(object):
 
         return coref_list
 
-    def extractNerCoref(self, text, title):
+    def extractNerCoref(self, filename, text, title, fiveWoneH):
         combine = text + '. ' + title
         ner = self.getNER(text)
         print "NER extraction completed"
         coref = self.getCoref(text)
         print "Coref extraction completed"
         nlp_dict = {
+            'filename' : filename,
             'title' : title,
             'text' : text,
             'ner' : ner,
-            'coref' : coref
+            'coref' : coref,
+            'fiveWoneH' : fiveWoneH
         }
-
+        print nlp_dict
         return nlp_dict
 
-    def saveObject(self, nlp_dict, filename):
-        self.count += 1
+    # saving extracted NER and COREF from news text into a pickle 
+    def saveObject(self, nlp_dict):
+        # self.count += 1
         folder = "nlp_object"
-        name = filename + "_" + str(self.count) + ".pkl"
+        name = nlp_dict['filename'] + ".pkl"
         joblib.dump(nlp_dict, os.path.join(folder, name))
-        print "Inserted text from file " + filename + " with index " + str(self.count)
+        print "Inserted text from file " + nlp_dict['filename']
 
-    def extractNews(self,file_open,file_close):
-        dataset = se.loadData(file_open)
-        dataset.apply(lambda x: se.saveObject(se.extractNerCoref(x['content'], x['title']), file_close), axis=1)
+    def extractNews(self, dataset, prefix):
+        # dataset = se.loadData(file_open)
+        dataset.apply(lambda x: se.saveObject(se.extractNerCoref(x['filename'], x['text'], x['title'], x['fiveWoneH'])), axis=1)
 
-# se = NewsEntityExtractor()
-# file_open = "Java Program/ta eva/cnn_guardian.csv"
-# file_close = 'news'
+    def cleansingText(self, text):
+        text = self.pre.eliminatePunctuation(text)
+        return self.pre.normalizePunctuation(text)
+
+    def getGoldenDataset(self):
+        path_to_json = "datasets/"
+
+        data = pd.DataFrame()
+
+        for filename in os.listdir(path_to_json):
+            if filename.endswith('.json'):
+                with open(os.path.join(path_to_json ,filename)) as json_data:
+                    json_result = json.load(json_data)
+                    json_result['filename'] = filename
+                    data = data.append(json_result, ignore_index=True)
+        data['text'] = data['text'].apply(lambda x: self.cleansingText(x))
+        data['title'] = data['title'].apply(lambda x: self.cleansingText(x))
+        data = data.dropna(axis=1, how="any")
+
+        return data
+
+se = NewsEntityExtractor()
+
+# data = se.getGoldenDataset()
+# prefix = 'golden_data'
+# se.extractNews(data, prefix)
+
+
+
+
 # se.extractNews(file_open,file_close)
 
+# file_open = "news/test_news.csv" #file yang akan dibaca
+# file_close = 'test' #prefix dari nama file hasil
+# se.extractNews(file_open,file_close)

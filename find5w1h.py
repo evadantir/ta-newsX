@@ -118,20 +118,23 @@ class Find5W1H(object):
             return 0
 
     def isTime(self,candidate):
+        from datetime import datetime
+        
         try:
             parsed_candidate = parse(candidate)
-            print parsed_candidate
+            now = datetime.now()
 
-            # check if candidate contain date
-
-            if parsed_candidate.day ==  0: #if candidate doesn't contain day
-                # additional check: if candidate contain month or year
-                if ((parsed_candidate.month != 0) or (parsed_candidate.year !=0)):
-                    return 0
-                else: #if candidate doesnt contain any of that
-                    return 1
-            else:
+            if not parsed_candidate.time():
                 return 0
+            else:
+                if parsed_candidate.day ==  now.date(): #if candidate doesn't contain day
+                    if parsed_candidate.time() < now.time():
+                        print parsed_candidate.time()
+                        return 1
+                    else:
+                        return 0
+                else:
+                    return 1
         
         except ValueError:
             return 0
@@ -262,10 +265,11 @@ class Find5W1H(object):
 fd = Find5W1H()
 
 # print fd.isTime({'year': [2015, 2016],'month': [2, 3],'day': [4, 5]})
-print fd.isTime('21:08')
-print fd.isTime('2 A.M.')
-print fd.isTime('9 PM')
-print fd.isTime('6.10 am')
+# print fd.isTime('August 2010 not a time')
+# print fd.isTime('2 A.M.')
+# print fd.isTime('9 PM')
+# print fd.isTime('6.10 am')
+print fd.isTime('2 September 2019 1 AM')
 # title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
 # text="Donald Trump told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour in June 2018- that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."
 # who = "Taylor Swift"

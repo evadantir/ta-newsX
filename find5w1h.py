@@ -8,9 +8,11 @@ from nltk.tag import StanfordNERTagger
 from nltk.tag import StanfordPOSTagger
 from nltk.tree import *
 import numpy as np
+from dateutil.parser import parse
 import re
 from Tkinter import *
 import Tkinter, Tkconstants, tkFileDialog
+
 
 class Find5W1H(object):
 
@@ -62,26 +64,77 @@ class Find5W1H(object):
         dataset['occ_title'] = dataset['occ_title'].map({False: 0, True: 1}).astype(int)
         return dataset
 
-    def extractDateFromText(self,data):
+    def extractWhenFromText(self, when_candidates):
+        when = None
+        when_score = None
 
-        list_date = []
+        for candidate in when_candidates:
+            candidate_score = scoreWhenCandidate(candidate)
+            if not when_score or candidate_score > when_score:
+                when = candidate
+                when_score = candidate_score
 
-        date = []
-        for sent in data:
-            for ner in sent:
-                if ner[1] == 'DATE':
-                    date.append(ner[0])
-                else:
-                    if date != []:
-                        list_date.append(' '.join(date))
-                        date = []
+        return when
 
-        list_date = self.pre.sieveSubstring(list_date)
+    def scoreWhenCandidate(self, candidate):
+        w0 = 10
+        w1 = w2 = 1
+        w3 = 5
 
-        if list_date:
-            return list_date
-        else:
-            return None
+        # w0, w1, w2, w3 = weight of value
+        # d = the document length measured in sentences
+        # pc || p(c) = the position measured in sentences of candidate c within the document
+
+        # d = ??
+        # pc = ??
+
+        # score = w0 * ((d-pc) / d) + w1 * self.isDate(candidate) + w2 * self.isTime(candidate) + w3 * self.isDateTime(candidate)
+        return score
+
+    def isDate(self,candidate):
+    # solution https://www.saltycrane.com/blog/2008/06/how-to-get-current-date-and-time-in/ 
+        try:
+            parsed_candidate = parse(candidate)
+            # check if candidate contain time
+
+            if parsed_candidate.hour ==  0: #if candidate doesn't contain hour
+                # additional check: if candidate contain minute or second
+                if ((parsed_candidate.minute != 0) or (parsed_candidate.second !=0)):
+                    return 0
+                else: #if candidate doesnt contain any of that
+                    return 1
+            else:
+                return 0
+        
+        except ValueError:
+            return 0
+
+    def isDateTime(self,candidate):
+    
+        try:
+            parsed_candidate = parse(candidate)
+            return 1
+        except ValueError:
+            return 0
+
+    def isTime(self,candidate):
+        try:
+            parsed_candidate = parse(candidate)
+            print parsed_candidate
+
+            # check if candidate contain date
+
+            if parsed_candidate.day ==  0: #if candidate doesn't contain day
+                # additional check: if candidate contain month or year
+                if ((parsed_candidate.month != 0) or (parsed_candidate.year !=0)):
+                    return 0
+                else: #if candidate doesnt contain any of that
+                    return 1
+            else:
+                return 0
+        
+        except ValueError:
+            return 0
 
     # extracting what element from text -- LOGIC STILL NEEDED TO BE APPROVED
     def extractWhatFromText(self,who_candidates,title,text):
@@ -208,13 +261,18 @@ class Find5W1H(object):
 
 fd = Find5W1H()
 
+# print fd.isTime({'year': [2015, 2016],'month': [2, 3],'day': [4, 5]})
+print fd.isTime('21:08')
+print fd.isTime('2 A.M.')
+print fd.isTime('9 PM')
+print fd.isTime('6.10 am')
 # title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
 # text="Donald Trump told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour in June 2018- that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."
 # who = "Taylor Swift"
 # what = "Taylor Swift praises Manchester's 'incredible resilience' after bombing."
 # test = "Taylor Swift praises Manchester's 'incredible resilience' after bombing she said it because she thinks that they will never going to let anyone forget about those victims"
-title = u"Taliban attacks German consulate in northern Afghan city of Mazar-i-Sharif with truck bomb"
-text = u"The death toll from a powerful Taliban truck bombing at the German consulate in Afghanistan's Mazar-i-Sharif city rose to at least six Friday, with more than 100 others wounded in a major militant assault. The Taliban said the bombing late Thursday, which tore a massive crater in the road and overturned cars, was a \"revenge attack\" for US air strikes this month in the volatile province of Kunduz that left 32 civilians dead. The explosion, followed by sporadic gunfire, reverberated across the usually tranquil northern city, smashing windows of nearby shops and leaving terrified local residents fleeing for cover. \"The suicide attacker rammed his explosives-laden car into the wall of the German consulate,\" local police chief Sayed Kamal Sadat told AFP. All German staff from the consulate were unharmed, according to the foreign ministry in Berlin."
+# title = u"Taliban attacks German consulate in northern Afghan city of Mazar-i-Sharif with truck bomb"
+# text = u"The death toll from a powerful Taliban truck bombing at the German consulate in Afghanistan's Mazar-i-Sharif city rose to at least six Friday, with more than 100 others wounded in a major militant assault. The Taliban said the bombing late Thursday, which tore a massive crater in the road and overturned cars, was a \"revenge attack\" for US air strikes this month in the volatile province of Kunduz that left 32 civilians dead. The explosion, followed by sporadic gunfire, reverberated across the usually tranquil northern city, smashing windows of nearby shops and leaving terrified local residents fleeing for cover. \"The suicide attacker rammed his explosives-laden car into the wall of the German consulate,\" local police chief Sayed Kamal Sadat told AFP. All German staff from the consulate were unharmed, according to the foreign ministry in Berlin."
 # print fd.extractWhatFromText(who,title,text)
 # ner = fd.getNER(text)
 # print fd.extractDateFromText(ner)
@@ -224,9 +282,8 @@ text = u"The death toll from a powerful Taliban truck bombing at the German cons
 # text = """Skip Ad Ad Loading... x Embed x Share Toblerone is facing a mountain of criticism for changing the shape of its famous triangular candy bars in British stores, a move it blames on rising costs. USA TODAY Toblerone chocolate bars come in a variety of sizes, but recently changed the shape of two of its smaller bars sold in the UK. (Photo: Martin Ruetschi, AP) The UK has a chocolate bar crisis on its hands: the beloved Swiss chocolate bar is unrecognizable. Toblerone, the classic chocolate bar with almond-and-honey-filled triangle chunks, recently lost weight. In two sizes, the triangles shrunk, leaving wider gaps of chocolate. Toblerone can you tell me what this is all about... looks like there's half a bar missing! pic.twitter.com/C2VD3DjppE -- Alana Cartwright (@AlanaCartwrigh3) October 29, 2016  @HelenRyles Hi Helen, yes this is just our smaller bar. -- Toblerone (@Toblerone) October 31, 2016  The 400-gram bar was reduced to a 360-gram bar and the 170-gram was reduced to 150 grams. \"Like many other companies, we are experiencing higher costs for numerous ingredients ... we have had to reduce the weight of just two of our bars in the UK,\" the company said on Facebook. People aren't happy about the change. The new #Toblerone. Wrong on so many levels. It now looks like a bicycle stand.#WeWantOurTobleroneBack. pic.twitter.com/C71KeNUWF1 -- James Melville (@JamesMelville) November 8, 2016  So unhappy, in fact, it's outpacing U.S. Election Day news. I'm so happy that readers of BBC News have got their priorities right. #Toblerone#Election2016pic.twitter.com/eeAlvoTqY6 -- David Wriglesworth (@Wriggy) November 8, 2016 It could be the end of the world as we know it. So what are the good folk of Britain talking about? Toblerone. pic.twitter.com/i8ryxmHc5c -- Julia Hartley-Brewer (@JuliaHB1) November 8, 2016 Some blame Brexit. Straight up the worst thing about brexit is Toblerone down sizing -- Alex Littlewood (@Alex_JL29) November 8, 2016 #toblerone#brexit I told you that leaving the EU would have serious consequences. Now I' m really upset. pic.twitter.com/w81cWYpNl4 -- Mark Greenwood (@markcjgreenwood) November 8, 2016 The company denies the change is tied to Brexit, a Mondelez spokeswoman told the BBC. The only bars affected are sold in the UK."""
 # text = "The death toll from a powerful Taliban truck bombing at the German consulate in Afghanistan's Mazar-i-Sharif city rose to at least six Friday, with more than 100 others wounded in a major militant assault. The Taliban said the bombing late Thursday, which tore a massive crater in the road and overturned cars, was a \"revenge attack\" for US air strikes this month in the volatile province of Kunduz that left 32 civilians dead. The explosion, followed by sporadic gunfire, reverberated across the usually tranquil northern city, smashing windows of nearby shops and leaving terrified local residents fleeing for cover. \"The suicide attacker rammed his explosives-laden car into the wall of the German consulate,\" local police chief Sayed Kamal Sadat told AFP. All German staff from the consulate were unharmed, according to the foreign ministry in Berlin."
 # title = "Taliban attacks German consulate in northern Afghan city of Mazar-i-Sharif with truck bomb"
-# text = "The death toll from a powerful Taliban truck bombing at the German consulate in Afghanistan's Mazar-i-Sharif city rose to at least six Friday, with more than 100 others wounded in a major militant assault. The Taliban said the bombing late Thursday, which tore a massive crater in the road and overturned cars, was a \"revenge attack\" for US air strikes this month in the volatile province of Kunduz that left 32 civilians dead. The explosion, followed by sporadic gunfire, reverberated across the usually tranquil northern city, smashing windows of nearby shops and leaving terrified local residents fleeing for cover. \"The suicide attacker rammed his explosives-laden car into the wall of the German consulate,\" local police chief Sayed Kamal Sadat told AFP. All German staff from the consulate were unharmed, according to the foreign ministry in Berlin."
-# title = "Taliban attacks German consulate in northern Afghan city of Mazar-i-Sharif with truck bomb"
-print fd.extract5w(text, title)
+
+# print fd.extract5w(text, title)
 # print fivews
 # fd.openJSONNews()
 

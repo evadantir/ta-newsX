@@ -322,10 +322,10 @@ class ExtractFeaturesValue(object):
 
 e = ExtractFeaturesValue()
 
-data = e.loadPickle('./nlp_object/0e5fa7c0e6252bfeeea5e3840c6cb503f299c19d24331c4ba60c5974.json.pkl')
-# data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
-entities= e.extractEntity(data["ner"])
-print entities
+# data = e.loadPickle('./nlp_object/0e5fa7c0e6252bfeeea5e3840c6cb503f299c19d24331c4ba60c5974.json.pkl')
+# # data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
+# entities= e.extractEntity(data["ner"])
+# print entities
 # print e.findNounPhraseFromTitle(data["title"],entities)
 
 # find feature in one text and save it to excel

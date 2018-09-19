@@ -64,45 +64,75 @@ class Find5W1H(object):
         dataset['occ_title'] = dataset['occ_title'].map({False: 0, True: 1}).astype(int)
         return dataset
 
-    def extractWhenFromText(self, when_candidates):
+    def getWhenCandidatefromNER(self,ner):
+
+        list_date = []
+
+        date = []
+        for sent in data:
+            for ner in sent:
+                if ner[1] == 'DATE':
+                    date.append(ner[0])
+                else:
+                    if date != []:
+                        list_date.append(' '.join(date))
+                        date = []
+
+        list_date = self.pre.sieveSubstring(list_date)
+
+        if list_date:
+            return list_date
+        else:
+        return None
+
+    def extractWhenFromText(self,text,ner):
+        when_candidates = self.getWhenCandidatefromNER(ner)
         when = None
         when_score = None
 
         for candidate in when_candidates:
-            candidate_score = scoreWhenCandidate(candidate)
+            candidate_score = self.scoreWhenCandidate(candidate,text)
             if not when_score or candidate_score > when_score:
                 when = candidate
                 when_score = candidate_score
 
         return when
 
-    def scoreWhenCandidate(self, candidate):
+    def findPositioninText(self,candidate,text,sent_list):
+        pc = []
+
+        for i in range(len(sent_list)):
+            match = re.findall(r'\b'+re.escape(candidate.lower()) + r'\b',sent_list[i].lower())
+            if match:
+                pc.append(i)
+
+        return pc
+            
+    def scoreWhenCandidate(self, candidate,text): 
+        # w0, w1, w2, w3 = weight of value
+        # d = the document length measured in sentences
+        # pc || p(c) = the position measured in sentences of candidate c within the document
+        
         w0 = 10
         w1 = w2 = 1
         w3 = 5
 
-        # w0, w1, w2, w3 = weight of value
-        # d = the document length measured in sentences
-        # pc || p(c) = the position measured in sentences of candidate c within the document
+        sent_list = sent_tokenize(text)
+        d = len(sent_list)
+        pc = self.findPositioninText(candidate,text,sent_list)
 
-        # d = ??
-        # pc = ??
-
-        # score = w0 * ((d-pc) / d) + w1 * self.isDate(candidate) + w2 * self.isTime(candidate) + w3 * self.isDateTime(candidate)
+        score = w0 * ((d-pc) / d) + w1 * int(self.isDate(candidate)) + w2 * int(self.isTime(candidate)) + w3 * int(self.isDateTime(candidate))
+        print score
         return score
 
     def isDate(self,candidate):
     # solution https://www.saltycrane.com/blog/2008/06/how-to-get-current-date-and-time-in/ 
         try:
             parsed_candidate = parse(candidate)
-            # check if candidate contain time
 
-            if parsed_candidate.hour ==  0: #if candidate doesn't contain hour
-                # additional check: if candidate contain minute or second
-                if ((parsed_candidate.minute != 0) or (parsed_candidate.second !=0)):
-                    return 0
-                else: #if candidate doesnt contain any of that
-                    return 1
+            # check if candidate contain time, if so, return 1, else return 0
+            if not parsed_candidate.time():
+                return 1
             else:
                 return 0
         
@@ -124,18 +154,19 @@ class Find5W1H(object):
             parsed_candidate = parse(candidate)
             now = datetime.now()
 
+            # if parsed candidate doesnt contain time, return 0
             if not parsed_candidate.time():
                 return 0
             else:
+                # if contain time, check the date (parsed candidate usually give today's date as default if candidate is time only)
                 if parsed_candidate.day ==  now.date(): #if candidate doesn't contain day
-                    if parsed_candidate.time() < now.time():
-                        print parsed_candidate.time()
+                    if parsed_candidate.time() < now.time(): #check time, just in case
                         return 1
                     else:
                         return 0
+                #if contain time, check the date, if not the same as today, then it might be date+time, not time only
                 else:
-                    return 1
-        
+                    return 0
         except ValueError:
             return 0
 
@@ -243,12 +274,13 @@ class Find5W1H(object):
         where_model = "./model/train_where.pkl"
         who = self.extractWhoOrWhere(text,title,who_model)
         where = self.extractWhoOrWhere(text,title,where_model)
+        when = self.extractWhenFromText(text,entity)
         what = self.extractWhatFromText(who,title,text)
         result_dict = {
             "who" : who,
             'where' : where,
             'what' : what,
-            'when' : self.extractDateFromText(entity),
+            'when' : when,
             'why' : self.extractWhyFromText(what,text)
         }
         return result_dict
@@ -269,9 +301,11 @@ fd = Find5W1H()
 # print fd.isTime('2 A.M.')
 # print fd.isTime('9 PM')
 # print fd.isTime('6.10 am')
-print fd.isTime('2 September 2019 1 AM')
+# print fd.isTime('18 September 2018 1 AM')
 # title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
 # text="Donald Trump told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour in June 2018- that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."
+# candidate = "victims"
+# fd.findPositioninText(candidate,text)
 # who = "Taylor Swift"
 # what = "Taylor Swift praises Manchester's 'incredible resilience' after bombing."
 # test = "Taylor Swift praises Manchester's 'incredible resilience' after bombing she said it because she thinks that they will never going to let anyone forget about those victims"
@@ -283,7 +317,9 @@ print fd.isTime('2 September 2019 1 AM')
 # print fd.getPOS(what)
 # print fd.extractWhyFromText(what,test)
 # title = "While the U.S. talks about election, UK outraged over Toblerone chocolate"
-# text = """Skip Ad Ad Loading... x Embed x Share Toblerone is facing a mountain of criticism for changing the shape of its famous triangular candy bars in British stores, a move it blames on rising costs. USA TODAY Toblerone chocolate bars come in a variety of sizes, but recently changed the shape of two of its smaller bars sold in the UK. (Photo: Martin Ruetschi, AP) The UK has a chocolate bar crisis on its hands: the beloved Swiss chocolate bar is unrecognizable. Toblerone, the classic chocolate bar with almond-and-honey-filled triangle chunks, recently lost weight. In two sizes, the triangles shrunk, leaving wider gaps of chocolate. Toblerone can you tell me what this is all about... looks like there's half a bar missing! pic.twitter.com/C2VD3DjppE -- Alana Cartwright (@AlanaCartwrigh3) October 29, 2016  @HelenRyles Hi Helen, yes this is just our smaller bar. -- Toblerone (@Toblerone) October 31, 2016  The 400-gram bar was reduced to a 360-gram bar and the 170-gram was reduced to 150 grams. \"Like many other companies, we are experiencing higher costs for numerous ingredients ... we have had to reduce the weight of just two of our bars in the UK,\" the company said on Facebook. People aren't happy about the change. The new #Toblerone. Wrong on so many levels. It now looks like a bicycle stand.#WeWantOurTobleroneBack. pic.twitter.com/C71KeNUWF1 -- James Melville (@JamesMelville) November 8, 2016  So unhappy, in fact, it's outpacing U.S. Election Day news. I'm so happy that readers of BBC News have got their priorities right. #Toblerone#Election2016pic.twitter.com/eeAlvoTqY6 -- David Wriglesworth (@Wriggy) November 8, 2016 It could be the end of the world as we know it. So what are the good folk of Britain talking about? Toblerone. pic.twitter.com/i8ryxmHc5c -- Julia Hartley-Brewer (@JuliaHB1) November 8, 2016 Some blame Brexit. Straight up the worst thing about brexit is Toblerone down sizing -- Alex Littlewood (@Alex_JL29) November 8, 2016 #toblerone#brexit I told you that leaving the EU would have serious consequences. Now I' m really upset. pic.twitter.com/w81cWYpNl4 -- Mark Greenwood (@markcjgreenwood) November 8, 2016 The company denies the change is tied to Brexit, a Mondelez spokeswoman told the BBC. The only bars affected are sold in the UK."""
+# candidate = ['October 31, 2016','October 29, 2016','November 8, 2016']
+# text = """Toblerone is facing a mountain of criticism for changing the shape of its famous triangular candy bars in British stores, a move it blames on rising costs. USA TODAY Toblerone chocolate bars come in a variety of sizes, but recently changed the shape of two of its smaller bars sold in the UK. (Photo: Martin Ruetschi, AP) The UK has a chocolate bar crisis on its hands: the beloved Swiss chocolate bar is unrecognizable. Toblerone, the classic chocolate bar with almond-and-honey-filled triangle chunks, recently lost weight. In two sizes, the triangles shrunk, leaving wider gaps of chocolate. Toblerone can you tell me what this is all about... looks like there's half a bar missing! pic.twitter.com/C2VD3DjppE -- Alana Cartwright (@AlanaCartwrigh3) October 29, 2016  @HelenRyles Hi Helen, yes this is just our smaller bar. -- Toblerone (@Toblerone) October 31, 2016  The 400-gram bar was reduced to a 360-gram bar and the 170-gram was reduced to 150 grams. \"Like many other companies, we are experiencing higher costs for numerous ingredients ... we have had to reduce the weight of just two of our bars in the UK,\" the company said on Facebook. People aren't happy about the change. The new #Toblerone. Wrong on so many levels. It now looks like a bicycle stand.#WeWantOurTobleroneBack. pic.twitter.com/C71KeNUWF1 -- James Melville (@JamesMelville) November 8, 2016  So unhappy, in fact, it's outpacing U.S. Election Day news. I'm so happy that readers of BBC News have got their priorities right. #Toblerone#Election2016pic.twitter.com/eeAlvoTqY6 -- David Wriglesworth (@Wriggy) November 8, 2016 It could be the end of the world as we know it. So what are the good folk of Britain talking about? Toblerone. pic.twitter.com/i8ryxmHc5c -- Julia Hartley-Brewer (@JuliaHB1) November 8, 2016 Some blame Brexit. Straight up the worst thing about brexit is Toblerone down sizing -- Alex Littlewood (@Alex_JL29) November 8, 2016 #toblerone#brexit I told you that leaving the EU would have serious consequences. Now I' m really upset. pic.twitter.com/w81cWYpNl4 -- Mark Greenwood (@markcjgreenwood) November 8, 2016 The company denies the change is tied to Brexit, a Mondelez spokeswoman told the BBC. The only bars affected are sold in the UK."""
+print fd.extractWhenFromText(candidate,text)
 # text = "The death toll from a powerful Taliban truck bombing at the German consulate in Afghanistan's Mazar-i-Sharif city rose to at least six Friday, with more than 100 others wounded in a major militant assault. The Taliban said the bombing late Thursday, which tore a massive crater in the road and overturned cars, was a \"revenge attack\" for US air strikes this month in the volatile province of Kunduz that left 32 civilians dead. The explosion, followed by sporadic gunfire, reverberated across the usually tranquil northern city, smashing windows of nearby shops and leaving terrified local residents fleeing for cover. \"The suicide attacker rammed his explosives-laden car into the wall of the German consulate,\" local police chief Sayed Kamal Sadat told AFP. All German staff from the consulate were unharmed, according to the foreign ministry in Berlin."
 # title = "Taliban attacks German consulate in northern Afghan city of Mazar-i-Sharif with truck bomb"
 

@@ -9,9 +9,12 @@ from nltk.tag import StanfordPOSTagger
 from nltk.tree import *
 import numpy as np
 from dateutil.parser import parse
+import dateutil.parser as parser
 import re
 from Tkinter import *
 import Tkinter, Tkconstants, tkFileDialog
+
+from meta_parser import parse_date
 
 
 class Find5W1H(object):
@@ -69,7 +72,7 @@ class Find5W1H(object):
         list_date = []
 
         date = []
-        for sent in data:
+        for sent in ner:
             for ner in sent:
                 if ner[1] == 'DATE':
                     date.append(ner[0])
@@ -83,30 +86,32 @@ class Find5W1H(object):
         if list_date:
             return list_date
         else:
-        return None
+            return None
 
     def extractWhenFromText(self,text,ner):
-        when_candidates = self.getWhenCandidatefromNER(ner)
+        # when_candidates = self.getWhenCandidatefromNER(ner)
+        
+        when_candidates = ner
         when = None
         when_score = None
 
         for candidate in when_candidates:
             candidate_score = self.scoreWhenCandidate(candidate,text)
+            print "candidate: ", candidate
+            print "c_score: ", candidate_score
             if not when_score or candidate_score > when_score:
                 when = candidate
                 when_score = candidate_score
-
+                print "when_score", when_score
         return when
 
     def findPositioninText(self,candidate,text,sent_list):
-        pc = []
 
         for i in range(len(sent_list)):
             match = re.findall(r'\b'+re.escape(candidate.lower()) + r'\b',sent_list[i].lower())
             if match:
-                pc.append(i)
-
-        return pc
+                print sent_list[i]
+                return i+1
             
     def scoreWhenCandidate(self, candidate,text): 
         # w0, w1, w2, w3 = weight of value
@@ -119,10 +124,11 @@ class Find5W1H(object):
 
         sent_list = sent_tokenize(text)
         d = len(sent_list)
+        print "d",d
         pc = self.findPositioninText(candidate,text,sent_list)
+        print "pc " ,pc
 
-        score = w0 * ((d-pc) / d) + w1 * int(self.isDate(candidate)) + w2 * int(self.isTime(candidate)) + w3 * int(self.isDateTime(candidate))
-        print score
+        score = w0 * ((d-pc) / d) + w1 * self.isDate(candidate) + w2 * self.isTime(candidate) + w3 * self.isDateTime(candidate)
         return score
 
     def isDate(self,candidate):
@@ -148,25 +154,41 @@ class Find5W1H(object):
             return 0
 
     def isTime(self,candidate):
-        from datetime import datetime
-        
+        import datetime
+        parser.parser.parse = parse_date
         try:
-            parsed_candidate = parse(candidate)
-            now = datetime.now()
+            parsed_time = parser.parser().parse(candidate,None)
 
-            # if parsed candidate doesnt contain time, return 0
-            if not parsed_candidate.time():
-                return 0
-            else:
-                # if contain time, check the date (parsed candidate usually give today's date as default if candidate is time only)
-                if parsed_candidate.day ==  now.date(): #if candidate doesn't contain day
-                    if parsed_candidate.time() < now.time(): #check time, just in case
-                        return 1
-                    else:
-                        return 0
-                #if contain time, check the date, if not the same as today, then it might be date+time, not time only
+            # if contain time
+            if parsed_time[0].hour or parsed_time[0].minute or parsed_time[0].second or parsed_time[0].microsecond:
+                # if contain date too
+                if parsed_time[0].day or parsed_time[0].month or parsed_time[0].year or parsed_time[0].weekday:
+                    return 0.8
+                # if time only
                 else:
-                    return 0
+                    return 1
+            # if doesnt contain time and/or date
+            else:
+                return 0
+            # parsed_candidate = parse(candidate)
+            # print parsed_candidate
+            # now = datetime.now()
+
+            # # if parsed candidate doesnt contain time, return 0
+            # if not parsed_candidate.time():
+            #     return 0
+            # else:
+            #     if not parsed_candidate.date():
+            #         return 1
+            #     # # if contain time, check the date (parsed candidate usually give today's date as default if candidate is time only)
+            #     # if parsed_candidate.day ==  now.date(): #if candidate doesn't contain day
+            #     #     if parsed_candidate.time() < now.time(): #check time, just in case
+            #     #         return 1
+            #     #     else:
+            #     #         return 0
+            #     #if contain time, check the date, if not the same as today, then it might be date+time, not time only
+            #     else:
+            #         return 0.8
         except ValueError:
             return 0
 
@@ -298,10 +320,11 @@ fd = Find5W1H()
 
 # print fd.isTime({'year': [2015, 2016],'month': [2, 3],'day': [4, 5]})
 # print fd.isTime('August 2010 not a time')
-# print fd.isTime('2 A.M.')
+# print fd.isTime('2.10 A.M.')
 # print fd.isTime('9 PM')
 # print fd.isTime('6.10 am')
 # print fd.isTime('18 September 2018 1 AM')
+print fd.isTime('12 August 2017')
 # title= "The US Singer praises Manchester's 'incredible resilience' after bombing."
 # text="Donald Trump told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour in June 2018- that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."
 # candidate = "victims"
@@ -319,7 +342,7 @@ fd = Find5W1H()
 # title = "While the U.S. talks about election, UK outraged over Toblerone chocolate"
 # candidate = ['October 31, 2016','October 29, 2016','November 8, 2016']
 # text = """Toblerone is facing a mountain of criticism for changing the shape of its famous triangular candy bars in British stores, a move it blames on rising costs. USA TODAY Toblerone chocolate bars come in a variety of sizes, but recently changed the shape of two of its smaller bars sold in the UK. (Photo: Martin Ruetschi, AP) The UK has a chocolate bar crisis on its hands: the beloved Swiss chocolate bar is unrecognizable. Toblerone, the classic chocolate bar with almond-and-honey-filled triangle chunks, recently lost weight. In two sizes, the triangles shrunk, leaving wider gaps of chocolate. Toblerone can you tell me what this is all about... looks like there's half a bar missing! pic.twitter.com/C2VD3DjppE -- Alana Cartwright (@AlanaCartwrigh3) October 29, 2016  @HelenRyles Hi Helen, yes this is just our smaller bar. -- Toblerone (@Toblerone) October 31, 2016  The 400-gram bar was reduced to a 360-gram bar and the 170-gram was reduced to 150 grams. \"Like many other companies, we are experiencing higher costs for numerous ingredients ... we have had to reduce the weight of just two of our bars in the UK,\" the company said on Facebook. People aren't happy about the change. The new #Toblerone. Wrong on so many levels. It now looks like a bicycle stand.#WeWantOurTobleroneBack. pic.twitter.com/C71KeNUWF1 -- James Melville (@JamesMelville) November 8, 2016  So unhappy, in fact, it's outpacing U.S. Election Day news. I'm so happy that readers of BBC News have got their priorities right. #Toblerone#Election2016pic.twitter.com/eeAlvoTqY6 -- David Wriglesworth (@Wriggy) November 8, 2016 It could be the end of the world as we know it. So what are the good folk of Britain talking about? Toblerone. pic.twitter.com/i8ryxmHc5c -- Julia Hartley-Brewer (@JuliaHB1) November 8, 2016 Some blame Brexit. Straight up the worst thing about brexit is Toblerone down sizing -- Alex Littlewood (@Alex_JL29) November 8, 2016 #toblerone#brexit I told you that leaving the EU would have serious consequences. Now I' m really upset. pic.twitter.com/w81cWYpNl4 -- Mark Greenwood (@markcjgreenwood) November 8, 2016 The company denies the change is tied to Brexit, a Mondelez spokeswoman told the BBC. The only bars affected are sold in the UK."""
-print fd.extractWhenFromText(candidate,text)
+# print fd.extractWhenFromText(text,candidate)
 # text = "The death toll from a powerful Taliban truck bombing at the German consulate in Afghanistan's Mazar-i-Sharif city rose to at least six Friday, with more than 100 others wounded in a major militant assault. The Taliban said the bombing late Thursday, which tore a massive crater in the road and overturned cars, was a \"revenge attack\" for US air strikes this month in the volatile province of Kunduz that left 32 civilians dead. The explosion, followed by sporadic gunfire, reverberated across the usually tranquil northern city, smashing windows of nearby shops and leaving terrified local residents fleeing for cover. \"The suicide attacker rammed his explosives-laden car into the wall of the German consulate,\" local police chief Sayed Kamal Sadat told AFP. All German staff from the consulate were unharmed, according to the foreign ministry in Berlin."
 # title = "Taliban attacks German consulate in northern Afghan city of Mazar-i-Sharif with truck bomb"
 

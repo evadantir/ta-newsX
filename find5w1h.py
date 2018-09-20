@@ -25,7 +25,9 @@ class Find5W1H(object):
         self.exf = ExtractFeaturesValue()
     
     def extractNerCorefFromTxt(self, text,title):
+        
         combine = text + '. ' + title
+
         ner = self.nex.getNER(text)
         print "NER extraction completed"
         coref = self.nex.getCoref(text)
@@ -40,19 +42,22 @@ class Find5W1H(object):
         return nlp_dict
 
     def extractWhoOrWhere(self,text,title,ml,ner_coref):
+
+        # load machine learning model
         model = self.exf.loadPickle(ml)
+
+        # extracting features and convert it to numeric type
         features = self.exf.extractFeaturesDirectFromText(ner_coref)
         features = self.convertToNumeric(features)
         
-        predict_who = model.predict(features.drop('entity', axis=1))
-
-        # buat tes doang
-        # predict_who = np.array([1,0,1,0])
+        # predicting who or where by it's feature, dropping unused column
+        predict_candidate = model.predict(features.drop('entity', axis=1))
 
         candidate = []
-        for i in range(len(predict_who)):
-            if predict_who[i] == 1:
-                # insert who candidate to list
+
+        for i in range(len(predict_candidate)):
+            if predict_candidate[i] == 1:
+                # insert candidate to list
                 candidate.append(features.iloc[i,1])
         
         return candidate
@@ -64,6 +69,7 @@ class Find5W1H(object):
         return dataset
 
     def getWhenCandidatefromNER(self,ner):
+        # getting when candidate (date and time) from extracted NER
 
         list_date = []
         list_time = []
@@ -153,7 +159,7 @@ class Find5W1H(object):
             parsed_candidate = parser.parser().parse(candidate,None)
 
             # if contain date
-            if parsed_candidate[0].day or parsed_candidate[0].month or parsed_candidate[0].year or parsed_candidate[0].microsecond:
+            if parsed_candidate[0].day or parsed_candidate[0].month or parsed_candidate[0].year or parsed_candidate[0].weekday:
                 return 1
             # if doesnt contain time and/or date
             else:
@@ -269,28 +275,27 @@ class Find5W1H(object):
         return why_candidates
 
     def extract5w(self,text,title):
-        # combining title and text
-        combine = title + '. ' + text
-
-        # getting NER from combined text
-        # entity = self.nex.getNER(combine)
 
         # getting ML model for classifying who and where
         who_model = "./model/train_who.pkl"
         where_model = "./model/train_where.pkl"
 
+        # getting NER and Coref of the text
         ner_coref = self.extractNerCorefFromTxt(text,title)
 
+        # extracting 5w
         who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
         where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
-        when = self.extractWhenFromText(text,entity)
+        when = self.extractWhenFromText(text,ner_coref['ner'])
         what = self.extractWhatFromText(who,title,text)
+        why = self.extractWhyFromText(what,text)
+
         result_dict = {
             "who" : who,
             'where' : where,
             'what' : what,
             'when' : when,
-            'why' : self.extractWhyFromText(what,text)
+            'why' : why
         }
         return result_dict
 

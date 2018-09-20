@@ -31,12 +31,12 @@ class ExtractFeaturesValue(object):
     #     list_person = []
     #     list_loc = []
     #     list_org = []
-    #     list_misc = []
+    #     list_time = []
 
     #     for ner in data:
     #         # temporary array for person/org/loc composed from >1 word
     #         person = []
-    #         misc = []
+    #         time = []
     #         tempdict = {}
     #         org = []
     #         loc = []
@@ -49,8 +49,8 @@ class ExtractFeaturesValue(object):
     #                 org.append(sent["word"])
     #             elif (sent["ner"] == 'LOCATION') or (sent["ner"] == 'COUNTRY') or (sent["ner"] == 'CITY'):
     #                 loc.append(sent["word"])
-    #             elif sent["ner"] == 'MISC':
-    #                 misc.append(sent["word"])
+    #             elif sent["ner"] == 'time':
+    #                 time.append(sent["word"])
     #             #if it's not one of them...
     #             else:
     #                 #check if there's temp array that's not emptied yet 
@@ -74,21 +74,21 @@ class ExtractFeaturesValue(object):
     #                     list_loc.append(tempdict)
     #                     #empty temp array
     #                     loc = []
-    #                 if misc != []:
-    #                     tempdict["entity"] = ' '.join(misc)
-    #                     tempdict["type"] = "MISC"
-    #                     list_misc.append(tempdict)
+    #                 if time != []:
+    #                     tempdict["entity"] = ' '.join(time)
+    #                     tempdict["type"] = "time"
+    #                     list_time.append(tempdict)
     #                     #empty temp array
-    #                     misc = []
+    #                     time = []
     #                 #empty dictionary
     #                 tempdict = {}
 
     #     list_loc = self.pre.removeDuplicateListDict(list_loc)
     #     list_person = self.pre.removeDuplicateListDict(list_person)
     #     list_org = self.pre.removeDuplicateListDict(list_org)
-    #     list_misc = self.pre.removeDuplicateListDict(list_misc)
+    #     list_time = self.pre.removeDuplicateListDict(list_time)
 
-    #     entities = list_loc + list_person + list_org + list_misc
+    #     entities = list_loc + list_person + list_org + list_time
 
     #     return entities
 
@@ -98,14 +98,14 @@ class ExtractFeaturesValue(object):
         list_person = []
         list_loc = []
         list_org = []
-        # list_misc = []
+        list_time = []
         list_date = []
 
         for ner in data:
             # temporary array for person/org/loc composed from >1 word
             person = []
             date = []
-            # misc = []
+            time = []
             tempdict = {}
             org = []
             loc = []
@@ -120,8 +120,8 @@ class ExtractFeaturesValue(object):
                     loc.append(sent[0])
                 elif sent[1] == 'DATE':
                     date.append(sent[0])
-                # elif sent[1] == 'MISC':
-                #     misc.append(sent[0])
+                elif sent[1] == 'TIME':
+                    time.append(sent[0])
                 #if it's not one of them...
                 else:
                     #check if there's temp array that's not emptied yet 
@@ -151,19 +151,19 @@ class ExtractFeaturesValue(object):
                         list_date.append(tempdict)
                         #empty temp array
                         date = []
-                    # if misc != []:
-                    #     tempdict["entity"] = ' '.join(misc)
-                    #     tempdict["type"] = "MISC"
-                    #     list_misc.append(tempdict)
-                    #     #empty temp array
-                    #     misc = []
+                    if time != []:
+                        tempdict["entity"] = ' '.join(time)
+                        tempdict["type"] = "TIME"
+                        list_time.append(tempdict)
+                        #empty temp array
+                        time = []
                     #empty dictionary
                     tempdict = {}
 
         list_loc = self.pre.removeDuplicateListDict(list_loc)
         list_person = self.pre.removeDuplicateListDict(list_person)
         list_org = self.pre.removeDuplicateListDict(list_org)
-        # list_misc = self.pre.removeDuplicateListDict(list_misc)
+        list_time = self.pre.removeDuplicateListDict(list_time)
         list_date = self.pre.removeDuplicateListDict(list_date)
 
         entities = list_loc + list_person + list_org + list_date

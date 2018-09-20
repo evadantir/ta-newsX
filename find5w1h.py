@@ -7,7 +7,6 @@ from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
 from nltk.tag import StanfordPOSTagger
 from nltk.tree import *
-import numpy as np
 from dateutil.parser import parse
 import dateutil.parser as parser
 import re

@@ -73,7 +73,7 @@ class NewsEntityExtractor(object):
             'coref' : coref,
             'fiveWoneH' : fiveWoneH
         }
-        print nlp_dict
+
         return nlp_dict
 
     # saving extracted NER and COREF from news text into a pickle 

@@ -7,6 +7,7 @@ import os
 from preprocessing import Preprocess
 from newsentity_extractor import NewsEntityExtractor
 import openpyxl
+from pprint import pprint
 
 class ExtractFeaturesValue(object):
 
@@ -24,73 +25,6 @@ class ExtractFeaturesValue(object):
     def loadPickle(self,filename):
         pkl = joblib.load(filename)
         return pkl
-
-    # -- find out entity's type then extract it
-    # def extractEntityFromJSON(self,data):
-    #     # list of extracted people,loc, organization entities from text
-    #     list_person = []
-    #     list_loc = []
-    #     list_org = []
-    #     list_time = []
-
-    #     for ner in data:
-    #         # temporary array for person/org/loc composed from >1 word
-    #         person = []
-    #         time = []
-    #         tempdict = {}
-    #         org = []
-    #         loc = []
-    #         # looping for in each of sentences
-    #         for sent in ner:
-    #             # check if entity is person/loc/org. if found save it in temp array
-    #             if sent["ner"] == 'PERSON':  
-    #                 person.append(sent["word"])
-    #             elif sent["ner"] == 'ORGANIZATION':
-    #                 org.append(sent["word"])
-    #             elif (sent["ner"] == 'LOCATION') or (sent["ner"] == 'COUNTRY') or (sent["ner"] == 'CITY'):
-    #                 loc.append(sent["word"])
-    #             elif sent["ner"] == 'time':
-    #                 time.append(sent["word"])
-    #             #if it's not one of them...
-    #             else:
-    #                 #check if there's temp array that's not emptied yet 
-    #                 if person != []:
-    #                     tempdict["entity"] = ' '.join(person)
-    #                     tempdict["type"] = "PERSON"
-    #                     list_person.append(tempdict)
-    #                     #empty temp array
-    #                     person = []
-    #                 # if 
-    #                 if org != []:
-    #                     tempdict["entity"] = ' '.join(org)
-    #                     tempdict["type"] = "ORGANIZATION"
-    #                     list_org.append(tempdict)
-    #                     #empty temp array
-    #                     org = []
-    #                 # if
-    #                 if loc != []:
-    #                     tempdict["entity"] = ' '.join(loc)
-    #                     tempdict["type"] = "LOCATION"
-    #                     list_loc.append(tempdict)
-    #                     #empty temp array
-    #                     loc = []
-    #                 if time != []:
-    #                     tempdict["entity"] = ' '.join(time)
-    #                     tempdict["type"] = "time"
-    #                     list_time.append(tempdict)
-    #                     #empty temp array
-    #                     time = []
-    #                 #empty dictionary
-    #                 tempdict = {}
-
-    #     list_loc = self.pre.removeDuplicateListDict(list_loc)
-    #     list_person = self.pre.removeDuplicateListDict(list_person)
-    #     list_org = self.pre.removeDuplicateListDict(list_org)
-    #     list_time = self.pre.removeDuplicateListDict(list_time)
-
-    #     entities = list_loc + list_person + list_org + list_time
-
-    #     return entities
 
     # -- find out entity's type then extract it
     def extractEntity(self,data):
@@ -196,21 +130,27 @@ class ExtractFeaturesValue(object):
         
         return entities
 
-    def countCfOccurencesInText(self,entities,coref):
+    def countCfOccurencesInText(self,entities,coref,title):
+        pprint(coref)
+        print
+
         # if "main" entity in coref extraction is the same with named entities from ner process, then unite it
         for i in range(len(entities)):
             # jumlah default kemunculan suatu entity,minimal 1 kali muncul
             count = 1
-            for cf in coref:
-                # hasil coref: {'main': entity, 'mentions': [...,..,...]}
-                # jika ternyata dari hasil coref (coref['main']) ada entity yang sama dengan entity dari ner, maka jumlah kemunculan entity ditambahkan dengan jumlah entity dari coref (coref['mention'])  
-                if cf['main'] in entities[i]['entity']:
-                    count = 0
-                    count += len(cf['mentions'])
-                    entities[i]['occ_text'] = count
-                else:
-                    # jika tidak ada, maka jumlah kemunculan entity itu sesuai dengan jumlah defaultnya
-                    entities[i]['occ_text'] = count
+            if coref:
+                for cf in coref:
+                    # hasil coref: {'main': entity, 'mentions': [...,..,...]}
+                    # jika ternyata dari hasil coref (coref['main']) ada entity yang sama dengan entity dari ner, maka jumlah kemunculan entity ditambahkan dengan jumlah entity dari coref (coref['mention'])  
+                    if cf['main'] in entities[i]['entity']:
+                        count = 0
+                        count += len(cf['mentions'])
+                        entities[i]['occ_text'] = count
+                    else:
+                        # jika tidak ada, maka jumlah kemunculan entity itu sesuai dengan jumlah defaultnya
+                        entities[i]['occ_text'] = count
+            else:
+                entities[i]['occ_text'] = count
 
         return entities
 
@@ -226,17 +166,6 @@ class ExtractFeaturesValue(object):
             entities[i]["occ_title"] = occ_title
 
         return entities
-
-    #--count entity's occurences in text from coref -- NOT USED
-    def extractCoRef(self,data):
-
-        # cari yang mentionsnya (kata ganti) tidak kosong
-        cf_morethanone = [{"entity" : x["head"], "count" : len(x["mentions"])+1} for x in data if x["mentions"]]
-        #cari entity yang unique
-        cf_unique = [{"entity" : x["head"], "count" : 1} for x in data if not x["mentions"]]
-
-        temp = cf_morethanone + cf_unique
-        temp = pd.DataFrame(temp)
 
     # find entities distribution in one text
     def findDistribution(self, data, entities):
@@ -264,37 +193,26 @@ class ExtractFeaturesValue(object):
         
         return entities
 
-    # def extractFeaturesFromJSON(self,filename):
-
-    #     data = self.loadJSON(filename)
-
-    #     entities = self.extractEntityFromJSON(data["NER"])
-    #     entities = self.countManOccurencesInText(data["Text"],entities)
-    #     entities = self.findOccurencesInTitle(data["Title"],entities)
-    #     entities = self.findDistribution(data["Text"],entities)
-
-    #     feature = pd.DataFrame(entities)
-
-    #     return feature
-
     # combine all the module so we can extract features from pickle object
     def extractFeaturesFromPickle(self,idx,filename):
 
         #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
         data = self.loadPickle(filename)
+        pprint(data['title'])
+        pprint(filename)
         # extract entity yang ada berdasarkan data ner dari variable data
         entities = self.extractEntity(data["ner"])
         # ambil noun phrase dari judul, lalu masukkan ke data entities, jika ternyata ada yang sama, hapus
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
         # bandingkan entity dari coref dengan entity yang dari ner, jika ada yang sama, maka tambahkan jumlah kemunculannya dan simpan
-        entities = self.countCfOccurencesInText(entities,data["coref"])
+        entities = self.countCfOccurencesInText(entities,data["coref"],data["title"])
         # cari kemunculan enity di judul
         entities = self.findOccurencesInTitle(data["title"],entities)
         # cari nilai distribusid dari entity dalam teks
         entities = self.findDistribution(data["text"],entities)
         # append text index
         for entity in entities:
-            entity['id_text'] = idx
+            entity['id_text'] = filename
 
         feature = pd.DataFrame(entities)
 
@@ -322,21 +240,22 @@ class ExtractFeaturesValue(object):
 
 e = ExtractFeaturesValue()
 
-# data = e.loadPickle('./nlp_object/0e5fa7c0e6252bfeeea5e3840c6cb503f299c19d24331c4ba60c5974.json.pkl')
-# # data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
+# data = e.loadPickle('./nlp_object/golden_data_1.pkl')
+
+# data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
 # entities= e.extractEntity(data["ner"])
 # print entities
 # print e.findNounPhraseFromTitle(data["title"],entities)
-
+# pprint(data)
 # find feature in one text and save it to excel
-# path = "./nlp_object/"
-# filelist = os.listdir(path)
-# data = pd.DataFrame()
-# for idx, file in enumerate(filelist):
-#     temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
-#     data = data.append(temp)
-#     # e.convertToExcel("entities.xlsx",data)
+path = "./nlp_object/"
+filelist = os.listdir(path)
+data = pd.DataFrame()
+for idx, file in enumerate(filelist):
+    temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
+    data = data.append(temp)
+    # e.convertToExcel("entities.xlsx",data)
     
-#     # for testing only
-#     e.convertToExcel("goldendata_extracted_feature.xlsx",data)
+# #     # for testing only
+    e.convertToExcel("goldendata_extracted_feature.xlsx",data)
 

@@ -11,11 +11,13 @@ import json
 import pandas as pd
 import joblib
 import en_coref_md
+from stanfordcorenlp import StanfordCoreNLP 
 
 class NewsEntityExtractor(object):
     def __init__(self):
         self.count = 0
         self.pre = Preprocess()
+        self.stanford = StanfordCoreNLP('http://localhost', port=9000)
 
     # reading CSV 
     def loadData(self, filename):
@@ -46,18 +48,8 @@ class NewsEntityExtractor(object):
         return pos
 
     def getCoref(self,text):
-        nlp = en_coref_md.load()
-        doc = nlp(text)
-
-        coref_list = []
-        for blah in doc._.coref_clusters:
-            coref = {
-                'main' : str(blah.main),
-                'mentions' : [str(i) for i in blah.mentions]
-            }
-            coref_list.append(coref)
-
-        return coref_list
+        coref = self.stanford.coref(text)
+        return coref
 
     def extractNerCoref(self, filename, text, title, fiveWoneH):
         combine = text + '. ' + title

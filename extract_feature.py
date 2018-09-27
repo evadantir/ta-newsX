@@ -198,25 +198,25 @@ class ExtractFeaturesValue(object):
 
         #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
         data = self.loadPickle(filename)
-        pprint(data['title'])
+        pprint(data['coref'])
         pprint(filename)
         # extract entity yang ada berdasarkan data ner dari variable data
-        entities = self.extractEntity(data["ner"])
-        # ambil noun phrase dari judul, lalu masukkan ke data entities, jika ternyata ada yang sama, hapus
-        entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
-        # bandingkan entity dari coref dengan entity yang dari ner, jika ada yang sama, maka tambahkan jumlah kemunculannya dan simpan
-        entities = self.countCfOccurencesInText(entities,data["coref"],data["title"])
-        # cari kemunculan enity di judul
-        entities = self.findOccurencesInTitle(data["title"],entities)
-        # cari nilai distribusid dari entity dalam teks
-        entities = self.findDistribution(data["text"],entities)
-        # append text index
-        for entity in entities:
-            entity['id_text'] = filename
+        # entities = self.extractEntity(data["ner"])
+        # # ambil noun phrase dari judul, lalu masukkan ke data entities, jika ternyata ada yang sama, hapus
+        # entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
+        # # bandingkan entity dari coref dengan entity yang dari ner, jika ada yang sama, maka tambahkan jumlah kemunculannya dan simpan
+        # entities = self.countCfOccurencesInText(entities,data["coref"],data["title"])
+        # # cari kemunculan enity di judul
+        # entities = self.findOccurencesInTitle(data["title"],entities)
+        # # cari nilai distribusid dari entity dalam teks
+        # entities = self.findDistribution(data["text"],entities)
+        # # append text index
+        # for entity in entities:
+        #     entity['id_text'] = filename
 
-        feature = pd.DataFrame(entities)
+        # feature = pd.DataFrame(entities)
 
-        return feature
+        # return feature
 
     def extractFeaturesDirectFromText(self,data):
         
@@ -242,20 +242,21 @@ e = ExtractFeaturesValue()
 
 # data = e.loadPickle('./nlp_object/golden_data_1.pkl')
 
-# data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
+data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
 # entities= e.extractEntity(data["ner"])
 # print entities
 # print e.findNounPhraseFromTitle(data["title"],entities)
-# pprint(data)
+pprint(data['coref'])
 # find feature in one text and save it to excel
-path = "./nlp_object/"
-filelist = os.listdir(path)
-data = pd.DataFrame()
-for idx, file in enumerate(filelist):
-    temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
-    data = data.append(temp)
+# path = "./nlp_object/"
+# filelist = os.listdir(path)
+# data = pd.DataFrame()
+# for idx, file in enumerate(filelist):
+#     temp = e.extractFeaturesFromPickle(idx+1,os.path.join(path, file))
+#     exit()
+    # data = data.append(temp)
     # e.convertToExcel("entities.xlsx",data)
     
 # #     # for testing only
-    e.convertToExcel("goldendata_extracted_feature.xlsx",data)
+    # e.convertToExcel("goldendata_extracted_feature.xlsx",data)
 

@@ -99,4 +99,4 @@ if __name__=='__main__':
     l = 'response.content_type . acdef . '
     out = sentence_extraction(cleaning(l))
     for o in out:
-        print " ".join(tokenisasi_kalimat(o))
+        print(" ".join(tokenisasi_kalimat(o)))

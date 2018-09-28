@@ -10,14 +10,18 @@ import os
 import json
 import pandas as pd
 import joblib
-import en_coref_md
-from stanfordcorenlp import StanfordCoreNLP 
+# import en_coref_md
+from stanfordcorenlp import StanfordCoreNLP
+
+from pprint import pprint
 
 class NewsEntityExtractor(object):
     def __init__(self):
-        self.count = 0
         self.pre = Preprocess()
-        self.stanford = StanfordCoreNLP('http://localhost', port=9000)
+        self.scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
+        self.ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
+        self.pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
+        self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
     # reading CSV 
     def loadData(self, filename):
@@ -26,37 +30,37 @@ class NewsEntityExtractor(object):
 
     # parsing for getting verb phrase
     def getConstituencyParsing(self,text):
-        scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
-        return scp.raw_parse(text)
+        return self.scp.raw_parse(text)
 
-    def getNER(self,text):
+    # def getNER(self,text):
+    #     list_sentence = sent_tokenize(text)
+    #     print(list_sentence)
+    #     exit()
+    #     ner = []
+    #     for sent in list_sentence:
+    #         words = word_tokenize(sent)
+    #         ner.append(self.ner_tagger.tag(words))
+    #     return ner
 
-        list_sentence = sent_tokenize(text)
-        ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
-        ner = []
-        for sent in list_sentence:
-            words = word_tokenize(sent)
-            ner.append(ner_tagger.tag(words))
-
+    def getNER(self, text):
+        words = word_tokenize(text)
+        ner = self.ner_tagger.tag(words)
         return ner
 
     def getPOS(self,text):
-        pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
         words = word_tokenize(text)
-        pos = pos_tagger.tag(words)
-
+        pos = self.pos_tagger.tag(words)
         return pos
 
     def getCoref(self,text):
-        coref = self.stanford.coref(text)
+        coref = self.core_nlp.coref(text)
         return coref
 
     def extractNerCoref(self, filename, text, title, fiveWoneH):
-        combine = text + '. ' + title
         ner = self.getNER(text)
-        print "NER extraction completed"
+        print("NER extraction completed on ", filename)
         coref = self.getCoref(text)
-        print "Coref extraction completed"
+        print("Coref extraction completed on ", filename)
         nlp_dict = {
             'filename' : filename,
             'title' : title,
@@ -70,15 +74,14 @@ class NewsEntityExtractor(object):
 
     # saving extracted NER and COREF from news text into a pickle 
     def saveObject(self, nlp_dict):
-        # self.count += 1
         folder = "nlp_object"
         name = nlp_dict['filename'] + ".pkl"
         joblib.dump(nlp_dict, os.path.join(folder, name))
-        print "Inserted text from file " + nlp_dict['filename']
+        print("Inserted text from file " + nlp_dict['filename'])
 
-    def extractNews(self, dataset, prefix):
+    def extractNews(self, dataset):
         # dataset = se.loadData(file_open)
-        dataset.apply(lambda x: se.saveObject(se.extractNerCoref(x['filename'], x['text'], x['title'], x['fiveWoneH'])), axis=1)
+        dataset.apply(lambda x: self.saveObject(self.extractNerCoref(x['filename'], x['text'], x['title'], x['fiveWoneH'])), axis=1)
 
     def cleansingText(self, text):
         text = self.pre.eliminatePunctuation(text)
@@ -95,18 +98,17 @@ class NewsEntityExtractor(object):
                     json_result = json.load(json_data)
                     json_result['filename'] = filename
                     data = data.append(json_result, ignore_index=True)
-        data['text'] = data['text'].apply(lambda x: self.cleansingText(x))
-        data['title'] = data['title'].apply(lambda x: self.cleansingText(x))
-        data = data.dropna(axis=1, how="any")
+        # data['text'] = data['text'].apply(lambda x: self.cleansingText(x))
+        # data['title'] = data['title'].apply(lambda x: self.cleansingText(x))
+        # data = data.dropna(axis=1, how="any")
 
         return data
 
 se = NewsEntityExtractor()
 
-# data = se.getGoldenDataset()
-# prefix = 'golden_data'
-# se.extractNews(data, prefix)
-
+data = se.getGoldenDataset()
+se.extractNews(data)
+nlp.close()
 
 
 

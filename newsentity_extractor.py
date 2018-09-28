@@ -59,8 +59,14 @@ class NewsEntityExtractor(object):
     def extractNerCoref(self, filename, text, title, fiveWoneH):
         ner = self.getNER(text)
         print("NER extraction completed on ", filename)
-        coref = self.getCoref(text)
-        print("Coref extraction completed on ", filename)
+        try:
+            coref = self.getCoref(text)
+            print("Coref extraction completed on ", filename)
+
+        except json.decoder.JSONDecodeError:
+            coref = []
+            print("Coref extraction unfortunately failed on ", filename)
+
         nlp_dict = {
             'filename' : filename,
             'title' : title,
@@ -106,9 +112,9 @@ class NewsEntityExtractor(object):
 
 se = NewsEntityExtractor()
 
-data = se.getGoldenDataset()
-se.extractNews(data)
-nlp.close()
+# data = se.getGoldenDataset()
+# se.extractNews(data)
+# se.core_nlp.close()
 
 
 

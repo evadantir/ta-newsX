@@ -32,16 +32,6 @@ class NewsEntityExtractor(object):
     def getConstituencyParsing(self,text):
         return self.scp.raw_parse(text)
 
-    # def getNER(self,text):
-    #     list_sentence = sent_tokenize(text)
-    #     print(list_sentence)
-    #     exit()
-    #     ner = []
-    #     for sent in list_sentence:
-    #         words = word_tokenize(sent)
-    #         ner.append(self.ner_tagger.tag(words))
-    #     return ner
-
     def getNER(self, text):
         words = word_tokenize(text)
         ner = self.ner_tagger.tag(words)
@@ -53,8 +43,36 @@ class NewsEntityExtractor(object):
         return pos
 
     def getCoref(self,text):
-        coref = self.core_nlp.coref(text)
-        return coref
+        # property for annotating coref
+        props = {'annotators': 'coref', 'pipelineLanguage': 'en'}
+        # load annotation as json
+        data = json.loads(self.core_nlp.annotate(text,props))
+
+
+        coref_file = []
+        for idx,mentions in data['corefs'].items():
+            coref = {}
+            temp = []
+            comain = None
+            for m in mentions:
+                
+                print('stat: ',m['isRepresentativeMention'])
+                print('Mentions: ',m)
+                if m['isRepresentativeMention']:
+                    # if text is MAIN representative
+                    comain = m['text']
+                    print('Main: ',comain)
+                else:
+                    # if FALSE
+                    if comain:
+                        print(comain)
+                        # if not, add as mention representative
+                        temp.append(m['text'])
+                coref['main'] = comain
+                coref['mentions'] = temp
+                print(coref)
+            coref_file.append(coref)
+        return coref_file
 
     def extractNerCoref(self, filename, text, title, fiveWoneH):
         ner = self.getNER(text)
@@ -104,9 +122,9 @@ class NewsEntityExtractor(object):
                     json_result = json.load(json_data)
                     json_result['filename'] = filename
                     data = data.append(json_result, ignore_index=True)
-        # data['text'] = data['text'].apply(lambda x: self.cleansingText(x))
-        # data['title'] = data['title'].apply(lambda x: self.cleansingText(x))
-        # data = data.dropna(axis=1, how="any")
+        data['text'] = data['text'].apply(lambda x: self.cleansingText(x))
+        data['title'] = data['title'].apply(lambda x: self.cleansingText(x))
+        data = data.dropna(axis=1, how="any")
 
         return data
 

@@ -28,11 +28,11 @@ class Trainer(object):
         if news_element == 'who':    
             # training and save into pickle
             joblib.dump(clf.fit(X, y),'model/train_who.pkl')
-            print "Model for WHERE has been saved"
+            print ("Model for WHERE has been saved")
         elif news_element == 'where':
             # training and save into pickle
             joblib.dump(clf.fit(X, y),'model/train_where.pkl')
-            print "Model for WHO has been saved"
+            print ("Model for WHO has been saved")
 
 tr = Trainer()
 

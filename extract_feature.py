@@ -142,9 +142,6 @@ class ExtractFeaturesValue(object):
                 if match:
                     # n of entity in sentence * index of sentences
                     dist  = dist + (len(match)*(j+1))
-                    print("len",len(match))
-                    print("j+1",j+1)
-                    print("match",len(match)*(j+1))
             
             if dist == 0:
                 print(entities[i])
@@ -182,7 +179,7 @@ class ExtractFeaturesValue(object):
         
         entities = self.extractEntity(data["ner"])
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
-        entities = self.countCfOccurencesInText(entities,data["coref"])
+        entities = self.countCfOccurencesInText(entities,data["coref"],data["title"])
         entities = self.findOccurencesInTitle(data["title"],entities)
         entities = self.findDistribution(data["text"],entities)
 
@@ -202,18 +199,18 @@ e = ExtractFeaturesValue()
 
 # data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
 
-# find feature in one text and save it to excel
-path = "./nlp_object/"
-filelist = os.listdir(path)
-data = pd.DataFrame()
+# # find feature in one text and save it to excel
+# path = "./nlp_object/"
+# filelist = os.listdir(path)
+# data = pd.DataFrame()
 
-for idx, file in enumerate(filelist):
+# for idx, file in enumerate(filelist):
 
-    #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
-    pkl_dict = e.loadPickle(os.path.join(path, file))
-    # ekstraksi fitur dari file pickle
-    temp = e.extractFeaturesFromPickle(pkl_dict)
-    data = data.append(temp)
+#     #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
+#     pkl_dict = e.loadPickle(os.path.join(path, file))
+#     # ekstraksi fitur dari file pickle
+#     temp = e.extractFeaturesFromPickle(pkl_dict)
+#     data = data.append(temp)
     
-e.convertToExcel("goldendata_extracted_feature.xlsx",data)
+# e.convertToExcel("goldendata_extracted_feature.xlsx",data)
 

@@ -1,6 +1,17 @@
 # import re
 # import string
 import json
+import joblib
+from pprint import pprint
+
+def loadPickle(filename):
+    pkl = joblib.load(filename)
+    return pkl
+
+data = loadPickle('./nlp_object/e8a979de28fef3fdc3a5f6ee1c971260273dd814493fa1760d0b098c.json.pkl')
+pprint(data['ner'])
+# print (data['coref'])
+exit()
 
 # candidate = [u'October', u'29', u',', u'2016']
 

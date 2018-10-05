@@ -55,22 +55,17 @@ class NewsEntityExtractor(object):
             temp = []
             comain = None
             for m in mentions:
-                
-                print('stat: ',m['isRepresentativeMention'])
-                print('Mentions: ',m)
                 if m['isRepresentativeMention']:
                     # if text is MAIN representative
                     comain = m['text']
-                    print('Main: ',comain)
                 else:
                     # if FALSE
                     if comain:
-                        print(comain)
                         # if not, add as mention representative
                         temp.append(m['text'])
                 coref['main'] = comain
                 coref['mentions'] = temp
-                print(coref)
+
             coref_file.append(coref)
         return coref_file
 

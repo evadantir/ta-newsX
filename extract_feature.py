@@ -37,25 +37,24 @@ class ExtractFeaturesValue(object):
         per = []
         org = []
         loc = []
-
+        # print(data)
         # looping in array of NER data
-        for i in range(len(data)): 
-
+        for i in range(len(data)):
+            
+            tempdict = {}
             if data[i][1] == 'PERSON':
                 per.append(data[i][0])
             elif data[i][1] == 'ORGANIZATION':
                 org.append(data[i][0])
             elif (data[i][1] == 'LOCATION') or (data[i][1] == 'COUNTRY') or (data[i][1] == 'CITY'):
                 loc.append(data[i][0])
-            else:
-                tempdict = {}
-                
+            else: 
                 if per:
                     tempdict["entity"] = ' '.join(per)
                     tempdict["type"] = "PERSON"
                     list_person.append(tempdict)
                     #empty temp array
-                    person = []
+                    per = []
                 elif org:
                     tempdict["entity"] = ' '.join(org)
                     tempdict["type"] = "ORGANIZATION"
@@ -99,7 +98,6 @@ class ExtractFeaturesValue(object):
             count = 1
             if coref:
                 for cf in coref:
-                    print(cf)
                     # hasil coref: {'main': entity, 'mentions': [...,..,...]}
                     # jika ternyata dari hasil coref (coref['main']) ada entity yang sama dengan entity dari ner, maka jumlah kemunculan entity ditambahkan dengan jumlah entity dari coref (coref['mention'])  
                     if cf['main'] in entities[i]['entity']:
@@ -114,8 +112,6 @@ class ExtractFeaturesValue(object):
                         entities[i]['occ_text'] = count
             else:
                 entities[i]['occ_text'] = count
-
-            print (count)
 
         return entities
 
@@ -152,9 +148,9 @@ class ExtractFeaturesValue(object):
             
             if dist == 0:
                 print(entities[i])
-            print(entities[i])
+
             # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
-            print(entities[i]["occ_text"])
+
             entities[i]["dist"] = float(dist / entities[i]["occ_text"])
         
         return entities
@@ -180,7 +176,6 @@ class ExtractFeaturesValue(object):
             entity['id_text'] = data["filename"]
 
         feature = pd.DataFrame(entities)
-
         return feature
 
     def extractFeaturesDirectFromText(self,data):

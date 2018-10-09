@@ -14,7 +14,7 @@ import re
 from meta_parser import parse_date
 
 
-class 5WExtractor(object):
+class FiveWExtractor(object):
 
     def __init__(self):
         self.pre = Preprocess()
@@ -305,7 +305,7 @@ class 5WExtractor(object):
     #     print (root.filename)
     #     news = pd.DataFrame()
 
-fd = 5WExtractor()
+fd = FiveWExtractor()
 
 # title= "Donald Trump praises Manchester's 'incredible resilience' after bombing."
 # text="Donald Trump told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour in June 2018- that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."

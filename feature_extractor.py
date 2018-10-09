@@ -193,7 +193,7 @@ class FeatureExtractor(object):
 
         print(filename + " successfully saved as Excel file!")
 
-e = FeatureExctractor()
+# e = FeatureExctractor()
 
 # data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
 

@@ -5,15 +5,15 @@ from nltk.tokenize import sent_tokenize
 import re
 import os
 from preprocessing import Preprocess
-from necoref_extract_fromnews import NewsEntityExtractor
+from nlp_helper import NLPHelper
 import openpyxl
 from pprint import pprint
 
-class ExtractFeaturesValue(object):
+class FeatureExtractor(object):
 
     def __init__(self):
         self.pre = Preprocess()
-        self.nex = NewsEntityExtractor()
+        self.nex = NLPHelper()
 
     #load json file
     def loadJSON(self, filename):
@@ -193,7 +193,7 @@ class ExtractFeaturesValue(object):
 
         print(filename + " successfully saved as Excel file!")
 
-e = ExtractFeaturesValue()
+e = FeatureExctractor()
 
 # data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
 

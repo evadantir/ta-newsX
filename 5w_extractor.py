@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from preprocessing import Preprocess
-from necoref_extract_fromnews import NewsEntityExtractor
-from extract_feature_frompkl_toexcel import ExtractFeaturesValue
+from nlp_helper import NLPHelper
+from feature_extractor import FeatureExtractor
 from nltk.tokenize import sent_tokenize,word_tokenize
 from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
@@ -10,18 +10,16 @@ from nltk.tree import *
 from dateutil.parser import parse
 import dateutil.parser as parser
 import re
-# from Tkinter import *
-# import Tkinter, Tkconstants, tkFileDialog
 
 from meta_parser import parse_date
 
 
-class Find5W1H(object):
+class 5WExtractor(object):
 
     def __init__(self):
         self.pre = Preprocess()
-        self.nex = NewsEntityExtractor()
-        self.exf = ExtractFeaturesValue()
+        self.nex = NLPHelper()
+        self.exf = FeatureExtractor()
     
     def extractNerCorefFromTxt(self, text,title):
         
@@ -307,7 +305,7 @@ class Find5W1H(object):
     #     print (root.filename)
     #     news = pd.DataFrame()
 
-fd = Find5W1H()
+fd = 5WExtractor()
 
 # title= "Donald Trump praises Manchester's 'incredible resilience' after bombing."
 # text="Donald Trump told the crowd at Manchester City's Etihad Stadium - the first UK show of her Reputation tour in June 2018- that the victims of last year's terror attack at the end of an Ariana Grande concert would never be forgotten. She said it because she thinks that they will never going to let anyone forget about those victims."

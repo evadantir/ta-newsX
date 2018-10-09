@@ -15,7 +15,7 @@ from stanfordcorenlp import StanfordCoreNLP
 
 from pprint import pprint
 
-class NewsEntityExtractor(object):
+class NLPHelper(object):
     def __init__(self):
         self.pre = Preprocess()
         self.scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
@@ -123,7 +123,7 @@ class NewsEntityExtractor(object):
 
         return data
 
-se = NewsEntityExtractor()
+se = NLPHelper()
 
 # data = se.getGoldenDataset()
 # se.extractNews(data)

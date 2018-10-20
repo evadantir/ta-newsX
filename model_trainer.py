@@ -16,13 +16,11 @@ class ModelTrainer(object):
         return dataset
 
     def train(self,dataset,drop_element):
-        #classifier algorithm
+        #classifier algorithm, n_estimator = jumlah tree, random_state= angka apapun, sengaja didefine biar hasilnya tetap sama
         clf = RandomForestClassifier(n_estimators=10, random_state=42)
 
         # extract feature needed, drop entity
         dataset = dataset.drop(['entity','id_text',drop_element], axis=1)
-        # print dataset
-        # exit()
 
         dataset = self.convertToNumeric(dataset)
 
@@ -32,11 +30,11 @@ class ModelTrainer(object):
         # y itu label
         y = dataset.iloc[:, -1]  # [x = take entire row, y = last column only]
 
-        # get training score with train test split
-        self.getTrainingScore(X, y, clf)
+        # get training score with train test split (cara biasa)
+        # self.getTrainingScore(X, y, clf)
 
         # get training score using cross validation
-        # self.nFoldCrossValidation(X, y, clf, nfold=5)
+        self.nFoldCrossValidation(X, y, clf, nfold=10)
 
         if drop_element == 'who':
             # training and save into pickle
@@ -86,9 +84,9 @@ class ModelTrainer(object):
             predictions = model.predict(X_test)
             test_score.append(accuracy_score(y_test, predictions).round(4))
 
-            precision_list.append(precision_score(y_test, predictions, average='macro').round(4))
-            recall_list.append(recall_score(y_test, predictions, average='macro').round(4))
-            fscore_list.append(f1_score(y_test, predictions, average='macro').round(4))
+            precision_list.append(precision_score(y_test, predictions).round(4))
+            recall_list.append(recall_score(y_test, predictions).round(4))
+            fscore_list.append(f1_score(y_test, predictions).round(4))
 
             print ("Fold " + str(fold_count) + ":")
             print (confusion_matrix(y_test, predictions))

@@ -9,4 +9,4 @@ def stratifiedKFold(data,X,y):
     
     stratified_kfold = StratifiedKFold(n_splits = FOLD)
     for train, test in stratified_kfold.split(X,y):
-        print("%s %s" % (train, test)) 
+        print("%s %s" % (train, test))

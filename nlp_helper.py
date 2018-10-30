@@ -4,6 +4,7 @@ from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
 from nltk.tag import StanfordPOSTagger
 from nltk.tree import *
+import nltk
 from preprocessing import Preprocess
 import re
 import os
@@ -17,6 +18,7 @@ from pprint import pprint
 
 class NLPHelper(object):
     def __init__(self):
+        nltk.internals.config_java(options='-xmx4g')
         self.pre = Preprocess()
         self.scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
         self.ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
@@ -29,13 +31,16 @@ class NLPHelper(object):
         return dataset
 
     # parsing for getting verb phrase
-    def getConstituencyParsing(self,text):
+    def getConstituencyParsing(self, text):
         return self.scp.raw_parse(text)
 
     def getNER(self, text):
         words = word_tokenize(text)
         ner = self.ner_tagger.tag(words)
         return ner
+
+    def getCP(self,text):
+        return self.core_nlp.parse(text)
 
     def getPOS(self,text):
         words = word_tokenize(text)
@@ -103,7 +108,7 @@ class NLPHelper(object):
         dataset.apply(lambda x: self.saveObject(self.extractNerCoref(x['filename'], x['text'], x['title'], x['fiveWoneH'])), axis=1)
 
     def cleansingText(self, text):
-        text = self.pre.eliminatePunctuation(text)
+        # text = self.pre.eliminatePunctuation(text)
         return self.pre.normalizePunctuation(text)
 
     def getGoldenDataset(self):

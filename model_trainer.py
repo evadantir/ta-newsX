@@ -38,7 +38,7 @@ class ModelTrainer(object):
         # self.getTrainingScore(X, y, clf)
 
         # get training score using cross validation
-        result = self.nFoldCrossValidation(X, y, clf, nfold=10)
+        result = self.nFoldCrossValidation(X, y, clf, nfold=5)
         
         if drop_element == 'who':
             # training and save into pickle

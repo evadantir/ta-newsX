@@ -147,7 +147,7 @@ tr = ModelTrainer()
 ut = Utility()
 
 # reading excel that contain features (HARUS DIKASIH KOLOM WHO DAN WHERE DULU, DAN DITENTUKAN YANG MANA WHO DAN WHERE)
-df = pd.read_excel('goldendata_extracted_feature.xlsx', sheet_name='Sheet1')
+df = pd.read_excel('cleaned_goldendata_extracted_feature.xlsx', sheet_name='Sheet1')
 # training model for detecting who and where, input "where" or "who" meaning that column will be dropped (deleted)
 who = tr.train(df,'where')
 where = tr.train(df,'who')

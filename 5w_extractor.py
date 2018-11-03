@@ -15,6 +15,7 @@ import pandas as pd
 from utility_code import Utility
 import json
 from meta_parser import parse_date
+from pprint import pprint
 
 
 class FiveWExtractor(object):
@@ -213,15 +214,24 @@ class FiveWExtractor(object):
     # extracting what element from text -- LOGIC STILL NEEDED TO BE APPROVED
     def extractWhatFromText(self,who_candidates,title,text):
         what = []
+        
         for who in who_candidates:
+            anno = []
             # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
             match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',title.lower())
             if match:
+                # print("Match: ",match)
                 anno = list(self.nex.getConstituencyParsing(title))
-                # print(anno)
                 # returning verb phrase from title
-                for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
-                    what.append(' '.join(sub_tree.leaves()))
+                vp = list(anno[0].subtrees(filter=lambda x: x.label()=='VP'))
+                vp_str = [" ".join(v.leaves()) for v in vp]
+                print(vp_str[0])
+                exit()
+                # print("VP",vp)
+                # for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
+                #     print(sub_tree.leaves())
+                #     what.append(' '.join(sub_tree.leaves()))
+                # print("Matched what:",what)
             # If there is no WHO in the headline, we search within the text for the first occurrence of our highest ranked WHO and also take the subsequent verb phrase as WHAT
             else:
                 sent_list = sent_tokenize(text)
@@ -234,8 +244,9 @@ class FiveWExtractor(object):
                         # print(anno)
                         break
                 # returning verb phrase from text
-                for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
-                    what.append(' '.join(sub_tree.leaves()))
+                if anno:
+                    for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
+                        what.append(' '.join(sub_tree.leaves()))
         # if what:
         #     return what
         # else:
@@ -364,9 +375,6 @@ class FiveWExtractor(object):
     def evaluateLocalNews(self,filename):
         
         data = self.nex.loadCSV(filename,',',"ISO-8859-1")
-        # data = data.iloc[:2, :]
-        # temp = pd.DataFrame(data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1))
-        # temp = data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1)
         data['extracted'] = data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1)
         # print(data['extracted'].iloc[0])
         temp = pd.DataFrame()
@@ -394,4 +402,10 @@ fd = FiveWExtractor()
 # print(type(huhu))
 # fd.prettyPrint5w(fd.extract5w(text,title))
 # fd.evaluateGoldenDatasetNews(file_range=(0,88))
-fd.evaluateLocalNews("beritalokal.csv")
+# fd.evaluateLocalNews("beritalokal.csv")
+
+title = "It's official: Prabowo to join 2019 race"
+text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday.His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo.\"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician.Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties.Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience.\"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties.\" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again.Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy.The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote.Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate.Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD).PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
+
+fd.extractWhatFromText('Prabowo Subianto',title,text)
+# A Gerindra official has said that Prabowo might declare his candidacy in Banyumas, Central Java, should the party secure the support of PAN and the PKS. However, PAN seems reluctant about unequivocally endorsing Prabowo, with its chairman Zulkifli Hasan, who attended the Gerindra meeting, saying that the party had yet to make a decision. \"If the PDI-P [Jokowi's Indonesian Democratic Party of Struggle] invited us, we would also come and speak,\" he said as quoted by Antara.Gerindra and the PKS have enough seats at the House to nominate Prabowo, but it is likely that Prabowo is seeking more support to match a much bigger political alliance behind Jokowi, who has the backing of five parties.Maksimus said Indonesia's dynamic political landscape meant that parties were still looking to see what moves might give them the edge. \"They're still doing a lot of maneuvering, trying to see if one of their own members has a chance at running,\" he said. Prabowo has struggled to match Jokowi's electability, which is at 45 to 55 percent, but Maksimus said that such a challenge was unlikely to be the cause of his indecision. \"Electability can change very quickly, Jokowi's electability can be high now, but who knows what it will be like on election day.\" He added that Prabowo had no other choice but to run as other potential candidates, such as former Indonesian Military chief Gatot Nurmantyo and Jakarta Governor Anies Baswedan, would not motivate the party machine in the same way that Prabowo would.Nevertheless, he did not dismiss out of hand the possibility of Prabowo pairing up with erstwhile adversary Jokowi, once again citing the fast-moving nature of Indonesian politics.\"If Prabowo is backed into a corner, then he might well decide to join forces with Jokowi, rather than leave empty-handed.\"

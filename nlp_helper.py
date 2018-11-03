@@ -26,8 +26,8 @@ class NLPHelper(object):
         self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
     # reading CSV 
-    def loadData(self, filename):
-        dataset = pd.read_csv(filename, sep=";")
+    def loadCSV(self, filename,separator,encode="utf-8"):
+        dataset = pd.read_csv(filename, sep=separator,encoding=encode)
         return dataset
 
     # parsing for getting verb phrase
@@ -75,7 +75,8 @@ class NLPHelper(object):
         return coref_file
 
     def extractNerCoref(self, filename, text, title, fiveWoneH):
-        ner = self.getNER(text)
+        combine = title + '. ' + text
+        ner = self.getNER(combine)
         print("NER extraction completed on ", filename)
         try:
             coref = self.getCoref(text)
@@ -104,7 +105,7 @@ class NLPHelper(object):
         print("Inserted text from file " + nlp_dict['filename'])
 
     def extractNews(self, dataset):
-        # dataset = se.loadData(file_open)
+        # dataset = se.loadCSV(file_open,sep=";")
         dataset.apply(lambda x: self.saveObject(self.extractNerCoref(x['filename'], x['text'], x['title'], x['fiveWoneH'])), axis=1)
 
     def cleansingText(self, text):
@@ -135,7 +136,7 @@ se = NLPHelper()
 # se.core_nlp.close()
 
 
-
+# print(se.loadCSV("beritalokal1.csv",",",encoding = "ISO-8859-1"))
 # se.extractNews(file_open,file_close)
 
 # file_open = "news/test_news.csv" #file yang akan dibaca

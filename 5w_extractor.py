@@ -218,7 +218,7 @@ class FiveWExtractor(object):
             match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',title.lower())
             if match:
                 anno = list(self.nex.getConstituencyParsing(title))
-                print(anno)
+                # print(anno)
                 # returning verb phrase from title
                 for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
                     what.append(' '.join(sub_tree.leaves()))
@@ -231,7 +231,7 @@ class FiveWExtractor(object):
                     if match:
                         # getting verb phrase
                         anno = list(self.nex.getConstituencyParsing(sent))
-                        print(anno)
+                        # print(anno)
                         break
                 # returning verb phrase from text
                 for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
@@ -240,8 +240,6 @@ class FiveWExtractor(object):
         #     return what
         # else:
         #     return None
-        print("What",what)
-        print()
         return what
 
     def extractWhyFromText(self,what_candidates,text):
@@ -353,15 +351,38 @@ class FiveWExtractor(object):
             # ekstraksi 5W dari file JSON
             try:
                 temp = self.extract5w(file_temp["text"],file_temp["title"])
+                temp["file"] = file
                 data = data.append(temp,ignore_index = True)
             except:
                 temp = []
                 print("It failed huhu")
-                # print("Coref extraction unfortunately failed on ", file)
-
-            print(temp)
            
-        self.ut.convertToExcel("goldendata_evaluate_8189.xlsx",data,'Sheet1')
+        self.ut.convertToExcel("goldendata_evaluate_089.xlsx",data,'Sheet1')
+
+        print("Evaluating golden data is done!")
+
+    def evaluateLocalNews(self,filename):
+        
+        data = self.nex.loadCSV(filename,',',"ISO-8859-1")
+        # data = data.iloc[:2, :]
+        # temp = pd.DataFrame(data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1))
+        # temp = data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1)
+        data['extracted'] = data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1)
+        # print(data['extracted'].iloc[0])
+        temp = pd.DataFrame()
+        temp['title'] = data['extracted'].apply(lambda x: x['title'])
+        temp['text'] = data['extracted'].apply(lambda x: x['text'])
+        temp['who'] = data['extracted'].apply(lambda x: x['who'])
+        temp['where'] = data['extracted'].apply(lambda x: x['where'])
+        temp['what'] = data['extracted'].apply(lambda x: x['what'])
+        temp['when'] = data['extracted'].apply(lambda x: x['when'])
+        temp['why'] = data['extracted'].apply(lambda x: x['why'])
+        # temp = pd.DataFrame.from_dict(data['extracted'])
+        print(temp)
+        # exit()
+        self.ut.convertToExcel("localnews_evaluate.xlsx",temp,'Sheet1')
+
+        print("Evaluating local news is done!")
 
 fd = FiveWExtractor()
 
@@ -372,4 +393,5 @@ fd = FiveWExtractor()
 # huhu = (fd.nex.getCP(title))
 # print(type(huhu))
 # fd.prettyPrint5w(fd.extract5w(text,title))
-fd.evaluateGoldenDatasetNews(file_range=(81,89))
+# fd.evaluateGoldenDatasetNews(file_range=(0,88))
+fd.evaluateLocalNews("beritalokal.csv")

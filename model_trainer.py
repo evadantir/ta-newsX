@@ -38,18 +38,20 @@ class ModelTrainer(object):
         # self.getTrainingScore(X, y, clf)
 
         # get training score using cross validation
-        result = self.nFoldCrossValidation(X, y, clf, nfold=5)
+        result = self.nFoldCrossValidation(X, y, clf, nfold=10)
         
         if drop_element == 'who':
             # training and save into pickle
             joblib.dump(clf,'model/train_where.pkl')
             print ("Model for WHERE has been saved")
-            ut.convertToExcel("./result/WHERE_result_7030.xlsx",result,"Sheet1")
+            ut.convertToExcel("./result/WHERE_result_10fold.xlsx",result,"Sheet1")
+            print("Cross Validation for WHERE model has been saved to excel file!")
         elif drop_element == 'where':
             # training and save into pickle
             joblib.dump(clf,'model/train_who.pkl')
             print ("Model for WHO has been saved")
-            ut.convertToExcel("./result/WHO_result_7030.xlsx",result,"Sheet1")
+            ut.convertToExcel("./result/WHO_result_10fold.xlsx",result,"Sheet1")
+            print("Cross Validation for WHO model has been saved to excel file!")
 
     # classic method
     def getTrainingScore(self, X, y, model):

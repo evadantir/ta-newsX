@@ -209,53 +209,6 @@ class FiveWExtractor(object):
         except (ValueError,AttributeError) as e:
             return 0
 
-    # extracting what element from text -- LOGIC STILL NEEDED TO BE APPROVED
-    # def extractWhatFromText(self,who_candidates,title,text):
-    #     what = []
-        
-    #     for who in who_candidates:
-    #         anno = []
-    #         vp_str = []
-    #         temp = who
-    #         names = who.split()
-    #         names.append(temp)
-    #         for name in names:
-    #         # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
-    #             match = re.findall(r'\b'+re.escape(name.lower()) + r'\b',title.lower())
-    #             # print(match)
-    #             if match:
-    #                 # print("Match: ",match)
-    #                 anno = list(self.nex.getConstituencyParsing(title))
-    #                 # returning verb phrase from title
-    #                 vp = list(anno[0].subtrees(filter=lambda x: x.label()=='VP'))
-    #                 vp_str = [" ".join(v.leaves()) for v in vp]
-                    
-    #                 for v in vp_str:
-    #                     pat = re.compile(name + r'.*$')
-    #                     found = re.search(name,v)
-    #                     if found:
-    #                         what.append(v.split(name)[1])
-
-    #                 # break
-    #                 # If there is no WHO in the headline, we search within the text for the first occurrence of our highest ranked WHO and also take the subsequent verb phrase as WHAT
-    #             else:
-    #                 sent_list = sent_tokenize(text)
-    #                 for sent in sent_list:
-    #                     # find first occurrence of who in sentence
-    #                     match = re.findall(r'\b'+re.escape(name.lower()) + r'\b',sent.lower())
-    #                     if match:
-    #                         # getting verb phrase
-    #                         anno = list(self.nex.getConstituencyParsing(sent))
-    #                         break
-    #                 # returning verb phrase from text
-    #                 if anno:
-    #                     for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
-    #                         what.append(' '.join(sub_tree.leaves()))
-
-    #     what = self.pre.sieveSubstring(what)
-
-    #     return what
-
     def extractWhatFromText(self,who_candidates,title,text):
         what = []
         for who in who_candidates:
@@ -281,10 +234,6 @@ class FiveWExtractor(object):
                 # returning verb phrase from text
                 for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
                     what.append(' '.join(sub_tree.leaves()))
-        # if what:
-        #     return what
-        # else:
-        #     return None
 
         what = self.pre.sieveSubstring(what)
 
@@ -420,9 +369,7 @@ class FiveWExtractor(object):
         temp['what'] = data['extracted'].apply(lambda x: x['what'])
         temp['when'] = data['extracted'].apply(lambda x: x['when'])
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
-        # temp = pd.DataFrame.from_dict(data['extracted'])
-        # print(temp)
-        # exit()
+
         self.ut.convertToExcel("back_localnews_evaluate.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")

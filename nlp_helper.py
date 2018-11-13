@@ -24,6 +24,7 @@ class NLPHelper(object):
         self.scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
         self.ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
         self.pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
+        self.id_ner_tagger = StanfordNERTagger('./stanford/id-ner-model-id.ser.gz','./stanford/stanford-ner.jar',encoding='utf8')
         self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
     # reading CSV 
@@ -39,6 +40,11 @@ class NLPHelper(object):
     def getNER(self, text):
         words = word_tokenize(text)
         ner = self.ner_tagger.tag(words)
+        return ner
+
+    def getIdnNER(self,text):
+        words = word_tokenize(text)
+        ner = self.id_ner_tagger.tag(words)
         return ner
 
     def getCP(self,text):

@@ -12,19 +12,23 @@ import os
 import json
 import pandas as pd
 import joblib
-# import en_coref_md
 from stanfordcorenlp import StanfordCoreNLP
-
+from combotagger import NERComboTagger
 from pprint import pprint
 
 class NLPHelper(object):
     def __init__(self):
+        
+        classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
+        classifier_path2 = "stanford/id-ner-model-id.ser.gz"
+        ner_jar_path = "stanford/stanford-ner.jar"
         nltk.internals.config_java(options='-xmx5g')
+
         self.pre = Preprocess()
         self.scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
-        self.ner_tagger = StanfordNERTagger('./stanford/english.muc.7class.distsim.crf.ser.gz','./stanford/stanford-ner.jar', encoding='utf8')
+        self.ner_tagger = StanfordNERTagger(classifier_path1,ner_jar_path, encoding='utf8')
         self.pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
-        self.id_ner_tagger = StanfordNERTagger('./stanford/id-ner-model-id.ser.gz','./stanford/stanford-ner.jar',encoding='utf8')
+        self.com_tagger = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2)
         self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
     # reading CSV 
@@ -138,15 +142,3 @@ class NLPHelper(object):
         return data
 
 se = NLPHelper()
-
-# data = se.getGoldenDataset()
-# se.extractNews(data)
-# se.core_nlp.close()
-
-
-# print(se.loadCSV("beritalokal1.csv",",",encoding = "ISO-8859-1"))
-# se.extractNews(file_open,file_close)
-
-# file_open = "news/test_news.csv" #file yang akan dibaca
-# file_close = 'test' #prefix dari nama file hasil
-# se.extractNews(file_open,file_close)

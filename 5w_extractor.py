@@ -41,6 +41,20 @@ class FiveWExtractor(object):
         
         return nlp_dict
 
+    def extractINANerAndCoref(self,text,title):
+        ner = self.nlp.getIdnNER(text)
+        print ("NER extraction completed")
+        coref = self.nlp.getCoref(text)
+        print ("Coref extraction completed")
+        nlp_dict = {
+            'title' : title,
+            'text' : text,
+            'ner' : ner,
+            'coref' : coref,
+        }
+        
+        return nlp_dict 
+
     def extractWhoOrWhere(self,text,title,ml,ner_coref):
 
         # load machine learning model
@@ -315,6 +329,35 @@ class FiveWExtractor(object):
         }
         return result_dict
 
+    def extract5wLocalNews(self,text,title):
+
+        # getting ML model for classifying who and where
+        who_model = "./model/train_who.pkl"
+        where_model = "./model/train_where.pkl"
+
+        # getting NER and Coref of the text
+        ner_coref = self.extractINANerAndCoref(text,title)
+        # extracting 5w
+        who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
+        where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
+        when = self.extractWhenFromText(text,ner_coref['ner'])
+        if who:
+            what = self.extractWhatFromText(who,title,text)
+        else:
+            what = None
+        why = self.extractWhyFromText(what,text)
+
+        result_dict = {
+            'title':title,
+            'text': text,
+            "who" : who,
+            'where' : where,
+            'what' : what,
+            'when' : when,
+            'why' : why
+        }
+        return result_dict
+
     def prettyPrint5w(self, result):
         print("News Title: ",result['title'])
         print()
@@ -360,7 +403,8 @@ class FiveWExtractor(object):
     def evaluateLocalNews(self,filename):
         
         data = self.ut.loadCSV(filename,',',"ISO-8859-1")
-        data['extracted'] = data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1)
+
+        data['extracted'] = data.apply(lambda x: self.extract5wLocalNews(x['text'], x['title']), axis=1)
         temp = pd.DataFrame()
         temp['title'] = data['extracted'].apply(lambda x: x['title'])
         temp['text'] = data['extracted'].apply(lambda x: x['text'])
@@ -370,7 +414,7 @@ class FiveWExtractor(object):
         temp['when'] = data['extracted'].apply(lambda x: x['when'])
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
-        self.ut.convertToExcel("back_localnews_evaluate.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("idnmodel_localnews_evaluate.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
 

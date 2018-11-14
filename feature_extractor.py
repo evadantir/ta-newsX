@@ -14,7 +14,7 @@ class FeatureExtractor(object):
 
     def __init__(self):
         self.pre = Preprocess()
-        self.nex = NLPHelper()
+        self.nlp = NLPHelper()
 
     #load json file
     def loadJSON(self, filename):
@@ -79,7 +79,7 @@ class FeatureExtractor(object):
         return entities
 
     def findNounPhraseFromTitle(self,title,entities):
-        anno = list(self.nex.getConstituencyParsing(title))
+        anno = list(self.nlp.getConstituencyParsing(title))
 
         # returning verb phrase from title
         temp = {}

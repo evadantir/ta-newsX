@@ -22,15 +22,15 @@ class FiveWExtractor(object):
 
     def __init__(self):
         self.pre = Preprocess()
-        self.nex = NLPHelper()
+        self.nlp = NLPHelper()
         self.exf = FeatureExtractor()
         self.ut = Utility()
     
     def extractNerCorefFromTxt(self, text,title):
 
-        ner = self.nex.getNER(text)
+        ner = self.nlp.getNER(text)
         print ("NER extraction completed")
-        coref = self.nex.getCoref(text)
+        coref = self.nlp.getCoref(text)
         print ("Coref extraction completed")
         nlp_dict = {
             'title' : title,
@@ -215,7 +215,7 @@ class FiveWExtractor(object):
             # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
             match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',title.lower())
             if match:
-                anno = list(self.nex.getConstituencyParsing(title))
+                anno = list(self.nlp.getConstituencyParsing(title))
                 # print(anno)
                 # returning verb phrase from title
                 for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
@@ -228,7 +228,7 @@ class FiveWExtractor(object):
                     match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',sent.lower())
                     if match:
                         # getting verb phrase
-                        anno = list(self.nex.getConstituencyParsing(sent))
+                        anno = list(self.nlp.getConstituencyParsing(sent))
                         # print(anno)
                         break
                 # returning verb phrase from text
@@ -264,7 +264,7 @@ class FiveWExtractor(object):
                     match = re.findall(r'\b' + what.lower() + r'\b',sent.lower())
                     if match:
                         # check with WHAT(.*)to/TO(.*)/VB rule
-                        pos = self.nex.getPOS(sent)
+                        pos = self.nlp.getPOS(sent)
                         for i in range(len(pos)):
                             if pos[i][1] == 'TO':
                                 if pos[i+1][1] == 'VB':
@@ -359,7 +359,7 @@ class FiveWExtractor(object):
 
     def evaluateLocalNews(self,filename):
         
-        data = self.nex.loadCSV(filename,',',"ISO-8859-1")
+        data = self.ut.loadCSV(filename,',',"ISO-8859-1")
         data['extracted'] = data.apply(lambda x: self.extract5w(x['text'], x['title']), axis=1)
         temp = pd.DataFrame()
         temp['title'] = data['extracted'].apply(lambda x: x['title'])
@@ -389,15 +389,16 @@ fd = FiveWExtractor()
 # print(fd.extractWhatFromText(['Max Verstappen'],title,text))
 
 
-# test =  list(fd.nex.getConstituencyParsing(title))
+# test =  list(fd.nlp.getConstituencyParsing(title))
 # print (test)
-# huhu = (fd.nex.getCP(title))
+# huhu = (fd.nlp.getCP(title))
 # print(type(huhu))
 # fd.prettyPrint5w(fd.extract5w(text,title))
 # fd.evaluateGoldenDatasetNews(file_range=(0,88))
-# fd.evaluateLocalNews("beritalokal.csv")
+fd.evaluateLocalNews("beritalokal.csv")
 
-title = "Bootleg liquor claims more lives in Bekasi"
-text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
 
-print(fd.nex.getIdnNER(text))
+# title = "Bootleg liquor claims more lives in Bekasi"
+# text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
+
+# print(fd.nlp.getIdnNER(text))

@@ -3,12 +3,9 @@ import json
 class Utility(object):
     def convertToExcel(self,filename,data,sheet):
         import xlsxwriter
+        
         # convert to excel
-        print (filename)
         excel = pd.ExcelWriter(filename,engine='openpyxl')
-        print (excel)
-        print (sheet)
-        print (data)
         data.to_excel(excel,sheet_name=sheet,index=False)
         excel.save()
 
@@ -24,5 +21,10 @@ class Utility(object):
     def loadPickle(self,filename):
         pkl = joblib.load(filename)
         return pkl
+
+        # reading CSV 
+    def loadCSV(self, filename,separator,encode="utf-8"):
+        dataset = pd.read_csv(filename, sep=separator,encoding=encode)
+        return dataset
 
 util = Utility()

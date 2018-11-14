@@ -31,11 +31,6 @@ class NLPHelper(object):
         self.com_tagger = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2)
         self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
-    # reading CSV 
-    def loadCSV(self, filename,separator,encode="utf-8"):
-        dataset = pd.read_csv(filename, sep=separator,encoding=encode)
-        return dataset
-
     # parsing for getting verb phrase
     def getConstituencyParsing(self, text):
         # props = {'parse.maxlen':'50'}
@@ -48,7 +43,7 @@ class NLPHelper(object):
 
     def getIdnNER(self,text):
         words = word_tokenize(text)
-        ner = self.id_ner_tagger.tag(words)
+        ner = self.com_tagger.tag(words)
         return ner
 
     def getCP(self,text):
@@ -117,11 +112,9 @@ class NLPHelper(object):
         print("Inserted text from file " + nlp_dict['filename'])
 
     def extractNews(self, dataset):
-        # dataset = se.loadCSV(file_open,sep=";")
         dataset.apply(lambda x: self.saveObject(self.extractNerCoref(x['filename'], x['text'], x['title'], x['fiveWoneH'])), axis=1)
 
     def cleansingText(self, text):
-        # text = self.pre.eliminatePunctuation(text)
         return self.pre.normalizePunctuation(text)
 
     def getGoldenDataset(self):
@@ -141,4 +134,4 @@ class NLPHelper(object):
 
         return data
 
-se = NLPHelper()
+nlp = NLPHelper()

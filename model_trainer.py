@@ -42,15 +42,15 @@ class ModelTrainer(object):
         
         if drop_element == 'who':
             # training and save into pickle
-            joblib.dump(clf,'model/train_where.pkl')
+            joblib.dump(clf,'model/train_where_idnhalf.pkl')
             print ("Model for WHERE has been saved")
-            ut.convertToExcel("./result/WHERE_result_10fold.xlsx",result,"Sheet1")
+            ut.convertToExcel("./result/idnhalf_WHERE_result_10fold.xlsx",result,"Sheet1")
             print("Cross Validation for WHERE model has been saved to excel file!")
         elif drop_element == 'where':
             # training and save into pickle
-            joblib.dump(clf,'model/train_who.pkl')
+            joblib.dump(clf,'model/train_who_idnhalf.pkl')
             print ("Model for WHO has been saved")
-            ut.convertToExcel("./result/WHO_result_10fold.xlsx",result,"Sheet1")
+            ut.convertToExcel("./result/idnhalf_WHO_result_10fold.xlsx",result,"Sheet1")
             print("Cross Validation for WHO model has been saved to excel file!")
 
     # classic method
@@ -149,7 +149,7 @@ tr = ModelTrainer()
 ut = Utility()
 
 # reading excel that contain features (HARUS DIKASIH KOLOM WHO DAN WHERE DULU, DAN DITENTUKAN YANG MANA WHO DAN WHERE)
-df = pd.read_excel('cleaned_goldendata_extracted_feature.xlsx', sheet_name='Sheet1')
+df = pd.read_excel('idnnerhalf_goldendata_extracted_feature.xlsx', sheet_name='Sheet1')
 # training model for detecting who and where, input "where" or "who" meaning that column will be dropped (deleted)
 who = tr.train(df,'where')
 where = tr.train(df,'who')

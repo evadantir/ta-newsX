@@ -62,6 +62,7 @@ class FiveWExtractor(object):
 
         # extracting features and convert it to numeric type
         features = self.exf.extractFeaturesDirectFromText(ner_coref)
+        print(features)
         features = self.convertToNumeric(features)
         
         # predicting who or where by it's feature, dropping unused column
@@ -303,8 +304,8 @@ class FiveWExtractor(object):
     def extract5w(self,text,title):
 
         # getting ML model for classifying who and where
-        who_model = "./model/train_who.pkl"
-        where_model = "./model/train_where.pkl"
+        who_model = "./model/train_who_idnhalf.pkl"
+        where_model = "./model/train_where_idnhalf.pkl"
 
         # getting NER and Coref of the text
         ner_coref = self.extractNerCorefFromTxt(text,title)
@@ -332,8 +333,8 @@ class FiveWExtractor(object):
     def extract5wLocalNews(self,text,title):
 
         # getting ML model for classifying who and where
-        who_model = "./model/train_who.pkl"
-        where_model = "./model/train_where.pkl"
+        who_model = "./model/train_who_idnhalf.pkl"
+        where_model = "./model/train_where_idnhalf.pkl"
 
         # getting NER and Coref of the text
         ner_coref = self.extractINANerAndCoref(text,title)
@@ -396,7 +397,7 @@ class FiveWExtractor(object):
                 temp = []
                 print("It failed huhu")
            
-        self.ut.convertToExcel("goldendata_evaluate_089.xlsx",data,'Sheet1')
+        self.ut.convertToExcel("idnhalf_goldendata_evaluate_089.xlsx",data,'Sheet1')
 
         print("Evaluating golden data is done!")
 
@@ -414,7 +415,7 @@ class FiveWExtractor(object):
         temp['when'] = data['extracted'].apply(lambda x: x['when'])
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
-        self.ut.convertToExcel("idnmodel_localnews_evaluate.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("idnhalf_localnews_evaluate.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
 
@@ -437,12 +438,14 @@ fd = FiveWExtractor()
 # print (test)
 # huhu = (fd.nlp.getCP(title))
 # print(type(huhu))
-# fd.prettyPrint5w(fd.extract5w(text,title))
+
 # fd.evaluateGoldenDatasetNews(file_range=(0,88))
-fd.evaluateLocalNews("beritalokal.csv")
+# fd.evaluateLocalNews("beritalokal.csv")
 
 
-# title = "Bootleg liquor claims more lives in Bekasi"
-# text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
+title = "Bootleg liquor claims more lives in Bekasi"
+text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
+
+fd.prettyPrint5w(fd.extract5w(text,title))
 
 # print(fd.nlp.getIdnNER(text))

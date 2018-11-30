@@ -191,7 +191,7 @@ ut = Utility()
 # data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
 
 # # find feature in one text and save it to excel
-# path = "./nlp_object/"
+# path = "idn_pickle_half/"
 # filelist = os.listdir(path)
 # data = pd.DataFrame()
 
@@ -203,5 +203,5 @@ ut = Utility()
 #     temp = e.extractFeaturesFromPickle(pkl_dict)
 #     data = data.append(temp)
     
-# ut.convertToExcel("cleaned_goldendata_extracted_feature.xlsx",data,'Sheet1')
+# ut.convertToExcel("idnnerhalf_goldendata_extracted_feature.xlsx",data,'Sheet1')
 

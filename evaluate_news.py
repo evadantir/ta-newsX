@@ -1,8 +1,5 @@
 import os
 import pandas as pd
-from preprocessing import Preprocess
-from nlp_helper import NLPHelper
-from feature_extractor import FeatureExtractor
 from utility_code import Utility
 from fivew_extractor import FiveWExtractor
 
@@ -61,5 +58,5 @@ class EvaluateNews(object):
 ev = EvaluateNews()
 
 
-# ev.evaluateGoldenDatasetNews(file_range=(0,88))
+ev.evaluateGoldenDatasetNews(file_range=(0,88))
 ev.evaluateLocalNews("beritalokal.csv")

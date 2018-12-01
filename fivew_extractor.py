@@ -2,6 +2,7 @@
 from preprocessing import Preprocess
 from nlp_helper import NLPHelper
 from feature_extractor import FeatureExtractor
+from utility_code import Utility
 from nltk.tokenize import sent_tokenize,word_tokenize
 from nltk.parse.stanford import StanfordParser
 from nltk.tag import StanfordNERTagger
@@ -12,7 +13,6 @@ import dateutil.parser as parser
 import re
 import os
 import pandas as pd
-from utility_code import Utility
 import json
 from meta_parser import parse_date
 from pprint import pprint
@@ -23,7 +23,7 @@ class FiveWExtractor(object):
     def __init__(self):
         self.pre = Preprocess()
         self.nlp = NLPHelper()
-        self.exf = FeatureExtractor()
+        self.fex = FeatureExtractor()
         self.ut = Utility()
     
     def extractNerCorefFromTxt(self, text,title):
@@ -58,10 +58,10 @@ class FiveWExtractor(object):
     def extractWhoOrWhere(self,text,title,ml,ner_coref):
 
         # load machine learning model
-        model = self.exf.loadPickle(ml)
+        model = self.fex.loadPickle(ml)
 
         # extracting features and convert it to numeric type
-        features = self.exf.extractFeaturesDirectFromText(ner_coref)
+        features = self.fex.extractFeaturesDirectFromText(ner_coref)
         print(features)
         features = self.convertToNumeric(features)
         
@@ -101,10 +101,10 @@ class FiveWExtractor(object):
                 time.append(ner[0])
             else:
                 if date != []:
-                    list_date.append(self.joinText(date))
+                    list_date.append(self.pre.joinText(date))
                     date = []
                 if time != []:
-                    list_time.append(self.joinText(time))
+                    list_time.append(self.pre.joinText(time))
                     time = []
 
         list_date = self.pre.sieveSubstring(list_date)
@@ -115,19 +115,6 @@ class FiveWExtractor(object):
             return when_candidates
         else:
             return None
-
-    def joinText(self,list_text):
-        import string
-
-        text = ""
-        for t in list_text:
-            if not text:
-                text = t
-            elif t in string.punctuation:
-                text += t
-            else:
-                text += " " + t
-        return text
 
     def extractWhenFromText(self,text,ner):
         when_candidates = self.getWhenCandidatefromNER(ner)
@@ -373,53 +360,8 @@ class FiveWExtractor(object):
         else:
             print("WHAT happened in the news: ",result['what'])
         print("WHEN did the news happen: ",result['when'])
-    
-    def evaluateGoldenDatasetNews(self, file_range=None):
-        # filerange = (0, 10)
-        # find feature in one text and save it to excel
-        path = "./datasets/"
-        filelist = os.listdir(path)
-        data = pd.DataFrame()
 
-        if file_range:
-            filelist = filelist[file_range[0]:file_range[1]]
-
-        for idx, file in enumerate(filelist):
-            print (file)
-            #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
-            file_temp = self.ut.loadJSON(os.path.join(path, file))
-            # ekstraksi 5W dari file JSON
-            try:
-                temp = self.extract5w(file_temp["text"],file_temp["title"])
-                temp["file"] = file
-                data = data.append(temp,ignore_index = True)
-            except:
-                temp = []
-                print("It failed huhu")
-           
-        self.ut.convertToExcel("idnhalf_goldendata_evaluate_089.xlsx",data,'Sheet1')
-
-        print("Evaluating golden data is done!")
-
-    def evaluateLocalNews(self,filename):
-        
-        data = self.ut.loadCSV(filename,',',"ISO-8859-1")
-
-        data['extracted'] = data.apply(lambda x: self.extract5wLocalNews(x['text'], x['title']), axis=1)
-        temp = pd.DataFrame()
-        temp['title'] = data['extracted'].apply(lambda x: x['title'])
-        temp['text'] = data['extracted'].apply(lambda x: x['text'])
-        temp['who'] = data['extracted'].apply(lambda x: x['who'])
-        temp['where'] = data['extracted'].apply(lambda x: x['where'])
-        temp['what'] = data['extracted'].apply(lambda x: x['what'])
-        temp['when'] = data['extracted'].apply(lambda x: x['when'])
-        temp['why'] = data['extracted'].apply(lambda x: x['why'])
-
-        self.ut.convertToExcel("idnhalf_localnews_evaluate.xlsx",temp,'Sheet1')
-
-        print("Evaluating local news is done!")
-
-fd = FiveWExtractor()
+fw = FiveWExtractor()
 
 # text="\"I must say that he surprised me,\" said father, Jos, who competed in Formula One from 1994 to 2003. \"I've seen many races of this, and this was incredible. Although Red Bull didn't have the right strategy and were unlucky with the weather, it was almost worth them having a bad stop to see what he did afterwards. It's good for F1, everyone is enthusiastic. What more do you want?\" Equally enraptured was Niki Lauda, the former world champion and Mercedes' non-executive chairman. Congratulating the Verstappen family, he said: \"Max was outstanding with the passes he performed. He did a job that was impressive. I knew the guy was good, but he has proved again to everybody what he can do.\""
 # title="Max Verstappen even stuns his dad by storming home into third place at Brazilian Grand Prix"
@@ -430,22 +372,22 @@ fd = FiveWExtractor()
 # text = """Shuttler Kevin Sanjaya Sukamuljo, half of the men's doubles pair that retained their title at the 2018 All England Open Badminton World Championships, has been awarded a cash bonus from his club Djarum Kudus and several sponsors on Wednesday for his achievements in Birmingham. \"It was a big responaibility to defend such a prestigious title like the All England,\" Kevin said in a statement. \"Support from [my] coaches and the experience of training in the club have been of great help for me to do my best,\" he added. Kevin won the All England men's doubles title with Marcus Fernaldi Gideon, who plays for the Tangkas Intiland Jakarta badminton club, defending the title they won in 2017. At Wednesday's event, Kevin received a check for Rp 200 million (US$14,550) from Djarum. The top-ranking doubles shuttler also received sponsors' vouchers worth Rp 40 million from e-commerce platform Bli-Bli and Rp 10 million from online travel agent Tiket.com, as well as a 55-inch LED television from home appliance company Polytron. Earlier, the Youth and Sports Ministry gave Kevin and Marcus each a Rp 250 million cash award. Djarum Foundation program director Yoppy Rosimin said he hoped that Kevin's success would set an example for junior shuttlers and inspired them to replicate his achievements. Djarum Foundation also awarded a cash bonus of Rp 70 million each to men's doubles coaches Herry IP and Aryono Miranat, who led their ace pair to win the prestigious badminton title."""
 # title = "It's official: Prabowo to join 2019 race"
 # text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday.His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo.\"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician.Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties.Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience.\"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties.\" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again.Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy.The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote.Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate.Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD).PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
-# print(fd.extractWhatFromText(['Kevin Sanjaya Sukamuljo'],title,text))
-# print(fd.extractWhatFromText(['Max Verstappen'],title,text))
+# print(fw.extractWhatFromText(['Kevin Sanjaya Sukamuljo'],title,text))
+# print(fw.extractWhatFromText(['Max Verstappen'],title,text))
 
 
-# test =  list(fd.nlp.getConstituencyParsing(title))
+# test =  list(fw.nlp.getConstituencyParsing(title))
 # print (test)
-# huhu = (fd.nlp.getCP(title))
+# huhu = (fw.nlp.getCP(title))
 # print(type(huhu))
 
-# fd.evaluateGoldenDatasetNews(file_range=(0,88))
-# fd.evaluateLocalNews("beritalokal.csv")
+# fw.evaluateGoldenDatasetNews(file_range=(0,88))
+# fw.evaluateLocalNews("beritalokal.csv")
 
 
 title = "Bootleg liquor claims more lives in Bekasi"
 text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
 
-fd.prettyPrint5w(fd.extract5w(text,title))
+fw.prettyPrint5w(fw.extract5w(text,title))
 
-# print(fd.nlp.getIdnNER(text))
+# print(fw.nlp.getIdnNER(text))

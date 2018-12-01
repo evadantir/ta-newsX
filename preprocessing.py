@@ -75,4 +75,17 @@ class Preprocess():
 
         return new_list
 
+    def joinText(self,list_text):
+        import string
+
+        text = ""
+        for t in list_text:
+            if not text:
+                text = t
+            elif t in string.punctuation:
+                text += t
+            else:
+                text += " " + t
+        return text
+
 p = Preprocess()

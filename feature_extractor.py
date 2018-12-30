@@ -16,17 +16,6 @@ class FeatureExtractor(object):
         self.pre = Preprocess()
         self.nlp = NLPHelper()
 
-    #load json file
-    def loadJSON(self, filename):
-        with open(filename) as file:
-            data = json.load(file)
-
-        return data
-
-    def loadPickle(self,filename):
-        pkl = joblib.load(filename)
-        return pkl
-
     # -- find out entity's type then extract it
     def extractEntity(self,data):
         # list of extracted people,loc, organization entities from text

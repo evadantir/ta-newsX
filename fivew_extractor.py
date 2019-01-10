@@ -349,17 +349,33 @@ class FiveWExtractor(object):
     def prettyPrint5w(self, result):
         print("News Title: ",result['title'])
         print()
-        print("WHO is in the news?: ",result['who'])
-        print("WHERE does the news take place?: ",result['where'])
+        if result['who']:
+            print("WHO is in the news?: ",result['who'])
+        else:
+            print("Sorry, can not detect the WHO in the news")
+
+        if result['where']:
+            print("WHERE does the news take place?: ",result['where'])
+        else:
+            print("Sorry, can not detect the WHERE in the news")
+
+        if result['when']:
+            print("WHEN did the news happen: ",result['when'])
+        else:
+            print("Sorry, can not detect the WHEN in the news")
+
         if not result['who']:
-            print("WHAT in the news is not detected, because the WHO element in the news is not detected")
-            if not result['why']:
-                print("WHY in the news is not detected, because the WHAT element in the news is not detected")
-            else:
-                print("WHY did the news happen: ",result['why'])
+            print("WHAT in the news is not detected, because the WHO element in the news was not detected")
         else:
             print("WHAT happened in the news: ",result['what'])
-        print("WHEN did the news happen: ",result['when'])
+
+        if not result['why']:
+            if no result['what']:
+                print("WHY in the news is not detected, because the WHAT element in the news was not detected")
+            else:
+                print("Sorry, can not detect the WHY in the news")
+        else:
+            print("WHY did the news happen: ",result['why'])
 
 fw = FiveWExtractor()
 

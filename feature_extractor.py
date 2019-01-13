@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 from nltk.tokenize import sent_tokenize
 import re
+import numpy as np
 import os
 from preprocessing import Preprocess
 from nlp_helper import NLPHelper
@@ -124,23 +125,24 @@ class FeatureExtractor(object):
 
         #for every entities
         for i in range(len(entities)):
-            dist = []
+            # dist = []
+            dist = 0
             #for every sentences
             for j in range(len(sent_list)):
                 #find how many times entities found in each sentence
                 match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent_list[j].lower())
                 if match:
                     # n of entity in sentence * index of sentences
-                    # dist  = dist + (len(match)*(j+1))
-                    dist = i
+                    dist  = dist + (len(match)*(j+1))
+                    # dist = i
             
             # if dist == 0:
             #     print(entities[i])
 
             # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
-
-            # entities[i]["dist"] = float(dist / entities[i]["occ_text"])
-            entities[i]["dist"] = float(sum(dist) / entities[i]["occ_text"])
+            # temp = np.sum(dist)
+            entities[i]["dist"] = float(dist / entities[i]["occ_text"])
+            # entities[i]["dist"] = float(temp / entities[i]["occ_text"])
         
         return entities
 

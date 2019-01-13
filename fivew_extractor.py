@@ -58,7 +58,7 @@ class FiveWExtractor(object):
     def extractWhoOrWhere(self,text,title,ml,ner_coref):
 
         # load machine learning model
-        model = self.fex.loadPickle(ml)
+        model = self.ut.loadPickle(ml)
 
         # extracting features and convert it to numeric type
         features = self.fex.extractFeaturesDirectFromText(ner_coref)
@@ -370,7 +370,7 @@ class FiveWExtractor(object):
             print("WHAT happened in the news: ",result['what'])
 
         if not result['why']:
-            if no result['what']:
+            if not result['what']:
                 print("WHY in the news is not detected, because the WHAT element in the news was not detected")
             else:
                 print("Sorry, can not detect the WHY in the news")
@@ -389,8 +389,13 @@ fw = FiveWExtractor()
 # title = "It's official: Prabowo to join 2019 race"
 # text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday.His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo.\"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician.Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties.Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience.\"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties.\" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again.Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy.The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote.Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate.Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD).PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
 
-title = "Bootleg liquor claims more lives in Bekasi"
-text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
+# title = "Bootleg liquor claims more lives in Bekasi"
+# text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
+
+print("Input the title of the news:")
+title = input()
+print("Input the text of the news:")
+text = input()
 
 fw.prettyPrint5w(fw.extract5w(text,title))
 

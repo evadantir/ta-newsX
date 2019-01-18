@@ -51,12 +51,12 @@ class EvaluateNews(object):
         temp['when'] = data['extracted'].apply(lambda x: x['when'])
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
-        self.ut.convertToExcel("idnhalf_localnews_evaluate.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("eksperimen2_localnews_evaluate.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
 
 ev = EvaluateNews()
 
 
-ev.evaluateGoldenDatasetNews(file_range=(0,88))
+# ev.evaluateGoldenDatasetNews(file_range=(0,88))
 ev.evaluateLocalNews("beritalokal.csv")

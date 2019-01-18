@@ -69,6 +69,7 @@ class FeatureExtractor(object):
         return entities
 
     def findNounPhraseFromTitle(self,title,entities):
+        print("Find Noun Phrase in title...")
         anno = list(self.nlp.getConstituencyParsing(title))
 
         # returning verb phrase from title
@@ -121,6 +122,7 @@ class FeatureExtractor(object):
 
     # find entities distribution in one text
     def findDistribution(self, data, entities):
+        
         sent_list = sent_tokenize(data)
 
         #for every entities
@@ -148,16 +150,21 @@ class FeatureExtractor(object):
 
     # combine all the module so we can extract features from pickle object
     def extractFeaturesFromPickle(self,data):
-
+        print("Extracting features...")
         # extract entity yang ada berdasarkan data ner dari variable data
+        print()
+        print("Extracting feature: entity types")
         entities = self.extractEntity(data["ner"])
         # ambil noun phrase dari judul, lalu masukkan ke data entities, jika ternyata ada yang sama, hapus
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
         # bandingkan entity dari coref dengan entity yang dari ner, jika ada yang sama, maka tambahkan jumlah kemunculannya dan simpan
+        print("Extracting feature: occurences in text ")
         entities = self.countCfOccurencesInText(entities,data["coref"],data["title"])
         # cari kemunculan enity di judul
+        print("Extracting feature: occurences in title ")
         entities = self.findOccurencesInTitle(data["title"],entities)
         # cari nilai distribusid dari entity dalam teks
+        print("Extracting feature: distribution ")
         entities = self.findDistribution(data["text"],entities)
 
         # append text index
@@ -168,11 +175,15 @@ class FeatureExtractor(object):
         return feature
 
     def extractFeaturesDirectFromText(self,data):
-        
+        print("Extracting features from text...")
+        print("Extracting feature: entity types")
         entities = self.extractEntity(data["ner"])
         entities = self.pre.removeDuplicateListDict(self.findNounPhraseFromTitle(data["title"],entities))
+        print("Extracting feature: occurences in text ")
         entities = self.countCfOccurencesInText(entities,data["coref"],data["title"])
+        print("Extracting feature: occurences in title ")
         entities = self.findOccurencesInTitle(data["title"],entities)
+        print("Extracting feature: distribution ")
         entities = self.findDistribution(data["text"],entities)
 
         feature = pd.DataFrame(entities)

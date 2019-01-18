@@ -19,9 +19,9 @@ class NLPHelper(object):
     def __init__(self):
         
         classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
-        # classifier_path2 = "stanford/id-ner-model-id.ser.gz"
+        classifier_path2 = "stanford/id-ner-model-id.ser.gz"
         # classifier_path2 = "stanford/id-ner-model-2.ser.gz"
-        classifier_path2 = "stanford/id-ner-model-half.ser.gz"
+        # classifier_path2 = "stanford/id-ner-model-half.ser.gz"
         ner_jar_path = "stanford/stanford-ner.jar"
 
         # for handling error nltk internals
@@ -54,6 +54,7 @@ class NLPHelper(object):
 
     # get Constituency parsing from text
     def getCP(self,text):
+        print("constituency parsing the text...")
         return self.core_nlp.parse(text)
 
     # get Part of Speech in text
@@ -131,6 +132,7 @@ class NLPHelper(object):
 
     # normalizing puncutation in text
     def cleansingText(self, text):
+        print("normalizing punctuation in text")
         return self.pre.normalizePunctuation(text)
 
     # get golden dataset's entity

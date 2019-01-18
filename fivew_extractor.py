@@ -62,12 +62,12 @@ class FiveWExtractor(object):
 
         # extracting features and convert it to numeric type
         features = self.fex.extractFeaturesDirectFromText(ner_coref)
-        print(features)
+        # print(features)
         features = self.convertToNumeric(features)
         
         # predicting who or where by it's feature, dropping unused column
         predict_candidate = model.predict(features.drop('entity', axis=1))
-
+        print("candidates: ", predict_candidate)
         candidate = []
 
         for i in range(len(predict_candidate)):
@@ -84,6 +84,7 @@ class FiveWExtractor(object):
         return dataset
 
     def getWhenCandidatefromNER(self,ner_list):
+        print("Getting date and time entities in text with NER...")
 
         # getting when candidate (date and time) from extracted NER
 
@@ -117,6 +118,8 @@ class FiveWExtractor(object):
             return None
 
     def extractWhenFromText(self,text,ner):
+        print()
+        print("Extracting WHEN...")
         when_candidates = self.getWhenCandidatefromNER(ner)
 
         if when_candidates:
@@ -148,7 +151,7 @@ class FiveWExtractor(object):
         # w0, w1, w2, w3 = weight of value
         # d = the document length measured in sentences
         # pc || p(c) = the position measured in sentences of candidate c within the document
-
+        print("Scoring WHEN candidate: "+ candidate)
         w0 = 10
         w1 = w2 = 1
         w3 = 5
@@ -161,12 +164,12 @@ class FiveWExtractor(object):
             score = w0 * ((d-pc) / d) + w1 * self.isDate(candidate) + w2 * self.isTime(candidate) + w3 * self.isDateTime(candidate)
         else:
             score = 0
-
+        
         return score
 
     def isDate(self,candidate):
         # check if candidate is date instance, else return 0
-
+        print("Checking if "+candidate+" can be parsed to a Date object...")
         parser.parser.parse = parse_date
         try:
             parsed_candidate = parser.parser().parse(candidate,None)
@@ -182,7 +185,7 @@ class FiveWExtractor(object):
 
     def isDateTime(self,candidate):
         # check if it's parseable to datetime type
-    
+        print("Checking if "+candidate+" can be parsed to a DateTime object...")
         try:
             parsed_candidate = parse(candidate)
             return 1
@@ -191,7 +194,7 @@ class FiveWExtractor(object):
 
     def isTime(self,candidate):
         # check if when candidate contains date+time, time only, or neither
-
+        print("Checking if "+candidate+" can be parsed to a Time object...")
         parser.parser.parse = parse_date
         try:
             parsed_time = parser.parser().parse(candidate,None)
@@ -212,11 +215,14 @@ class FiveWExtractor(object):
             return 0
 
     def extractWhatFromText(self,who_candidates,title,text):
+        print()
+        print("Extracting WHAT...")
         what = []
         for who in who_candidates:
             # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
             match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',title.lower())
             if match:
+                print("getting subsequent Verb Phrase from title...")
                 anno = list(self.nlp.getConstituencyParsing(title))
                 # print(anno)
                 # returning verb phrase from title
@@ -229,6 +235,7 @@ class FiveWExtractor(object):
                     # find first occurrence of who in sentence
                     match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',sent.lower())
                     if match:
+                        print("getting subsequent Verb Phrase from sentence...")
                         # getting verb phrase
                         anno = list(self.nlp.getConstituencyParsing(sent))
                         # print(anno)
@@ -242,6 +249,8 @@ class FiveWExtractor(object):
         return what
 
     def extractWhyFromText(self,what_candidates,text):
+        print()
+        print("Extracting WHY...")
         regexWhy = [('since',0.2),('cause',0.3),('because',0.3),('hence',0.2),('therefore',0.3),('why',0.3),('result',0.4),('reason',0.3),('provide',0.1),('s behind',0.1),('Due to',0.2)]
 
         #for returning reason candidates from inputted text(s)
@@ -263,13 +272,17 @@ class FiveWExtractor(object):
                 # check if what is in sentence
                 # anggap 1 kalimat hanya punya 1 what
                 for what in what_candidates:
-                    match = re.findall(r'\b' + what.lower() + r'\b',sent.lower())
-                    if match:
+                    # match = re.findall(r'\b' + what.lower() + r'\b',sent.lower())
+                    # if match:
+                    if what.lower() in sent.lower():
                         # check with WHAT(.*)to/TO(.*)/VB rule
+                        
+                        print("getting Part of Speech tag...")
                         pos = self.nlp.getPOS(sent)
                         for i in range(len(pos)):
                             if pos[i][1] == 'TO':
                                 if pos[i+1][1] == 'VB':
+                                    print("getting VERB in text...")
                                     rule = ('(WHAT(.*)to/TO(.*)/VB)',0.5)
                                     matched_key.append(rule)
                         # check with (WHAT(.*)will) rule
@@ -290,14 +303,27 @@ class FiveWExtractor(object):
 
     def extract5w(self,text,title):
 
-        # getting ML model for classifying who and where
+        # getting ML model for classifying who and where 
+        # scenario 1:
         who_model = "./model/train_who_idnhalf.pkl"
         where_model = "./model/train_where_idnhalf.pkl"
+
+        # scenario 2:
+        who_model = "./model/train_who_idnfull.pkl"
+        where_model = "./model/train_where_idnfull.pkl"
+
+                # scenario 3:
+        who_model = "./model/train_who.pkl"
+        where_model = "./model/train_where.pkl"
+
+        print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
 
         # getting NER and Coref of the text
         ner_coref = self.extractNerCorefFromTxt(text,title)
         # extracting 5w
+        print("Extracting WHO...")
         who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
+        print("\nExtracting WHERE...")
         where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
         when = self.extractWhenFromText(text,ner_coref['ner'])
         if who:
@@ -317,37 +343,34 @@ class FiveWExtractor(object):
         }
         return result_dict
 
-    def extract5wLocalNews(self,text,title):
+    # def extract5wLocalNews(self,text,title):
 
-        # getting ML model for classifying who and where
-        who_model = "./model/train_who_idnhalf.pkl"
-        where_model = "./model/train_where_idnhalf.pkl"
 
-        # getting NER and Coref of the text
-        ner_coref = self.extractINANerAndCoref(text,title)
-        # extracting 5w
-        who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
-        where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
-        when = self.extractWhenFromText(text,ner_coref['ner'])
-        if who:
-            what = self.extractWhatFromText(who,title,text)
-        else:
-            what = None
-        why = self.extractWhyFromText(what,text)
+    #     # getting NER and Coref of the text
+    #     ner_coref = self.extractINANerAndCoref(text,title)
+    #     # extracting 5w
+    #     who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
+    #     where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
+    #     when = self.extractWhenFromText(text,ner_coref['ner'])
+    #     if who:
+    #         what = self.extractWhatFromText(who,title,text)
+    #     else:
+    #         what = None
+    #     why = self.extractWhyFromText(what,text)
 
-        result_dict = {
-            'title':title,
-            'text': text,
-            "who" : who,
-            'where' : where,
-            'what' : what,
-            'when' : when,
-            'why' : why
-        }
-        return result_dict
+    #     result_dict = {
+    #         'title':title,
+    #         'text': text,
+    #         "who" : who,
+    #         'where' : where,
+    #         'what' : what,
+    #         'when' : when,
+    #         'why' : why
+    #     }
+    #     return result_dict
 
     def prettyPrint5w(self, result):
-        print("News Title: ",result['title'])
+        print("\nExtracted 5W from: "+result['title'])
         print()
         if result['who']:
             print("WHO is in the news?: ",result['who'])
@@ -360,14 +383,14 @@ class FiveWExtractor(object):
             print("Sorry, can not detect the WHERE in the news")
 
         if result['when']:
-            print("WHEN did the news happen: ",result['when'])
+            print("WHEN did the event in the news happen: ",result['when'])
         else:
             print("Sorry, can not detect the WHEN in the news")
 
         if not result['who']:
             print("WHAT in the news is not detected, because the WHO element in the news was not detected")
         else:
-            print("WHAT happened in the news: ",result['what'])
+            print("WHAT is the event that happened in the news: ",result['what'])
 
         if not result['why']:
             if not result['what']:
@@ -375,28 +398,24 @@ class FiveWExtractor(object):
             else:
                 print("Sorry, can not detect the WHY in the news")
         else:
-            print("WHY did the news happen: ",result['why'])
+            print("WHY did the event in the news happen: ",result['why'])
 
 fw = FiveWExtractor()
 
-# text="\"I must say that he surprised me,\" said father, Jos, who competed in Formula One from 1994 to 2003. \"I've seen many races of this, and this was incredible. Although Red Bull didn't have the right strategy and were unlucky with the weather, it was almost worth them having a bad stop to see what he did afterwards. It's good for F1, everyone is enthusiastic. What more do you want?\" Equally enraptured was Niki Lauda, the former world champion and Mercedes' non-executive chairman. Congratulating the Verstappen family, he said: \"Max was outstanding with the passes he performed. He did a job that was impressive. I knew the guy was good, but he has proved again to everybody what he can do.\""
-# title="Max Verstappen even stuns his dad by storming home into third place at Brazilian Grand Prix"
-
-# title = "Formula One star Max Verstappen shows nerves of steel to avoid serious accident after losing control of his car at 180mph in treacherous conditions at the Brazilian Grand Prix"
-# text =  "Teenage Formula One star Max Verstappen showed nerves of steel as he somehow managed to avoid a serious accident despite spinning his car at 180mph in dangerous conditions at the Brazilian Grand Prix. Travelling flat out at the Interlagos circuit, Verstappen lost control as he clipped the curb on the entrance to the long home straight, spinning his car sideways and sliding dangerously down the track. But just as it looked as though he was going to smash the nose of his car into the metal side hoardings, which would likely have seen his car catapulted into the middle of the track and into the path of other cars, he was able to straighten up and regain control. Max Verstappen clipped the curb on his way up the hill towards the home straight in Brazil. That caused Verstappen to lose control of his car as his back end slid round as he spun. With the nose of his Red Bull car pointing towards the wall, Verstappen slid down the track. Verstappen produced an incredible display to finish third at the Brazilian Grand Prix. Immediately after the incident a member of Verstappen's Red Bull pit crew calmly said 'well held Max, well held' on the team radio before the driver himself joked 'my heartbeat went a little higher there.' While many would have been shaken by such a high-speed incident, Verstappen showed maturity beyond his years as he recovered to eventually secure third place in the Grand Prix, behind Lewis Hamilton and Nico Rosberg. Verstappen is one of the hottest teenage talents F1 has ever seen and in his two seasons in the sport has thrilled and frustrated in equal measure, with an aggressive driving style which has split opinion both in the pits and in the stands. But the 19-year-old gained universal praise for the way he avoided a serious accident in hazardous conditions in Brazil, during a race in which a number of spectacular crashes caused major delays as drivers struggled to cope with the wet weather. The back of Verstappen's car slid out as the camera cut to show the view of the home straight. That left Verstappen in a vulnerable position, with his car side on and facing the barrier. But as he slid further and further down the track, Verstappen was able to straighten up. Miraculously he was able to drive away from the incident without hitting the wall of the track. The young Dutchman overcame adverse weather to produce a masterclass at Interlagos. The young Dutchman then produced one of the drives of the season as he sliced his way through the field from 16th to third, as the rain continued to fall, having found himself stranded down the field after being caught out by one of the numerous yellow flags deployed during the race. The safety car, which appears on the track to lead drivers round following a crash, was deployed five times during the race while a red flag was produced twice - taking the drivers off the track as conditions became too bad to race in. 'This is just mad,' said a furious Sebastian Vettel, who also spun earlier in the race, over the team radio. 'Stupid. What this race needs is a red flag. How many people do we want to crash?' It was a difficult afternoon for the race organisers, with some drivers calling for the grand prix to be abandoned due to hazardous conditions. Hamilton was not among their number. 'It is understandable for the first red flag with everyone going off,' he said. Kimi Raikkonen was fortunate to see his other Formula One drivers avoid colliding into his car. Raikkonen's Ferrari is removed from the track following his crash which brought a red flag. Felipe Massa also crashed out of the race, his last in his homeland before his retirement 'I don't really understand why the second stop came. But safety comes first and obviously it was thought it was needed. 'This is Formula One and the rain is the trickiest condition. If people didn't make mistakes, it would be too easy and everyone could do it. 'We run at serious speeds and there is a lot of water to disperse by the tyres and they struggle the faster we go.' The champagne was flowing once again for Lewis Hamilton (left) after he won in Brazil. Hamilton led the race in Brazil from start to finish after winning from pole position Hamilton revealed victory in Brazil had been an ambition of his since watching Ayrton Senna. For Hamilton to win the title, He must win in Abu Dhabi and hopes Rosberg finishes fourth or lower. If Rosberg finishes third in Abu Dhabi on Nov 27, he wins the championship. While Verstappen was one of a number of drivers involved in dramatic incidents during the race, things proved to be a lot more simple for Hamilton as he produced a masterful drive in the wet to win the race from pole position. The victory meant the reigning world champion stays in the race to win this year's title, but he faces a tough task to overhaul team-mate and rival Nico Rosberg at the final Grand Prix of the season, in Abu Dhabi on Sunday. 'I was genuinely chilling up front,' he said. 'When it rains it is usually good for me. There were no mistakes, no issues, no spins. It was interesting hearing about so many people having slips, but I didn't have any.' Rosberg leads the championship by 12 points heading into the final round, meaning third place for the German in Abu Dhabi will secure his first world title. "
-# title = "All England champ Kevin Sanjaya showered with bonuses"
-# text = """Shuttler Kevin Sanjaya Sukamuljo, half of the men's doubles pair that retained their title at the 2018 All England Open Badminton World Championships, has been awarded a cash bonus from his club Djarum Kudus and several sponsors on Wednesday for his achievements in Birmingham. \"It was a big responaibility to defend such a prestigious title like the All England,\" Kevin said in a statement. \"Support from [my] coaches and the experience of training in the club have been of great help for me to do my best,\" he added. Kevin won the All England men's doubles title with Marcus Fernaldi Gideon, who plays for the Tangkas Intiland Jakarta badminton club, defending the title they won in 2017. At Wednesday's event, Kevin received a check for Rp 200 million (US$14,550) from Djarum. The top-ranking doubles shuttler also received sponsors' vouchers worth Rp 40 million from e-commerce platform Bli-Bli and Rp 10 million from online travel agent Tiket.com, as well as a 55-inch LED television from home appliance company Polytron. Earlier, the Youth and Sports Ministry gave Kevin and Marcus each a Rp 250 million cash award. Djarum Foundation program director Yoppy Rosimin said he hoped that Kevin's success would set an example for junior shuttlers and inspired them to replicate his achievements. Djarum Foundation also awarded a cash bonus of Rp 70 million each to men's doubles coaches Herry IP and Aryono Miranat, who led their ace pair to win the prestigious badminton title."""
 # title = "It's official: Prabowo to join 2019 race"
 # text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday.His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo.\"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician.Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties.Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience.\"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties.\" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again.Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy.The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote.Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate.Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD).PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
 
-# title = "Bootleg liquor claims more lives in Bekasi"
-# text = "Five residents of Kodau Ambara Pura housing complex in Jatiasih, Bekasi, have reportedly died after drinking oplosan (bootleg liquor). The victims have been identified as Emo or Imron, 47, Alvian or Pokin, 52, Yopi, 45, Mambo or Hermadi, 58, and Heri Bayo, 57. \"My brother died on Thursday evening,\" said Hermadi's brother, Suryadi, as quoted by tribunnews.com on Friday. The five were close friends, Suryadi said, adding that the group might have drunk together last week after getting bootleg liquor for free from a man named Untung. Imron was the first to die on April 13 after suffering from severe stomach pains and respiratory problems. Alvian and Yopi died five days later. \"[Other residents and I] started suspecting that it was the bootleg liquor that had killed them, because we knew they all drank together last week,\" Suryadi explained. Jatiasih Police chief Comr. Illi Anas said that his team is investigating the case. \"We're attempting to gather as much information,\ Illi said."
 
-print("Input the title of the news:")
-title = input()
-print("Input the text of the news:")
-text = input()
+# print("Input the title of the news:")
+# title = input()
+# print("Input the text of the news:")
+# text = input()
+# print(fw.extract5wLocalNews(text,title))
 
+# print(fw.extractWhoOrWhere(text,title,))
+
+title = "Actress Titi Qadarsih passes away after battle with colon cancer"
+text = """Veteran actress Titi Qadarsih passed away on Monday after battling colon cancer. She was 73 years old."Mama has been sick since the fasting month, when the doctor diagnosed her with stage fourcolon cancer," said Indra Q, the late actress's son on Monday, as quoted by kompas.com.Indra said that Titi had been undergoing intensive treatment for the past couple of months, since the diagnosis was made during the fasting month that began in mid-May."We started the treatment around two months ago. The last two weeks were intensive at Fatmawati Hospital," said Indra, who is a BIP band member and Slank's former keyboardist.He said her death came unexpectedly. "Eating has been a bit difficult. But mama was always agile. We never knew, and she finally passed away like this," Indra said.Titi is expected to be buried at Tanah Kusir Cemetery in Kebayoran Lama, South Jakarta. Throughout her life, Titi was known for her diverse skills in the entertainment world, ranging from acting in movies, singing, dancing to modeling.Titi made her debut on the big screen in the 1996 movie Hancurnya Petualang(Destroyed Adventurers). She also joined the stage through Teater Koma and sang a duet with Gombloh. (liz/kes)"""
 fw.prettyPrint5w(fw.extract5w(text,title))
 
 # print(fw.nlp.getIdnNER(text))

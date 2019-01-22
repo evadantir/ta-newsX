@@ -64,6 +64,7 @@ class FiveWExtractor(object):
         features = self.fex.extractFeaturesDirectFromText(ner_coref)
         # print(features)
         features = self.convertToNumeric(features)
+        print(features)
         
         # predicting who or where by it's feature, dropping unused column
         predict_candidate = model.predict(features.drop('entity', axis=1))
@@ -305,16 +306,16 @@ class FiveWExtractor(object):
 
         # getting ML model for classifying who and where 
         # scenario 1:
-        who_model = "./model/train_who_idnhalf.pkl"
-        where_model = "./model/train_where_idnhalf.pkl"
+        # who_model = "./model/train_who_idnhalf.pkl"
+        # where_model = "./model/train_where_idnhalf.pkl"
 
-        # scenario 2:
+        # # scenario 2:
         who_model = "./model/train_who_idnfull.pkl"
         where_model = "./model/train_where_idnfull.pkl"
 
-                # scenario 3:
-        who_model = "./model/train_who.pkl"
-        where_model = "./model/train_where.pkl"
+        # # scenario 3:
+        # who_model = "./model/train_who.pkl"
+        # where_model = "./model/train_where.pkl"
 
         print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
 
@@ -325,21 +326,21 @@ class FiveWExtractor(object):
         who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
         print("\nExtracting WHERE...")
         where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
-        when = self.extractWhenFromText(text,ner_coref['ner'])
-        if who:
-            what = self.extractWhatFromText(who,title,text)
-        else:
-            what = None
-        why = self.extractWhyFromText(what,text)
+        # when = self.extractWhenFromText(text,ner_coref['ner'])
+        # if who:
+        #     what = self.extractWhatFromText(who,title,text)
+        # else:
+        #     what = None
+        # why = self.extractWhyFromText(what,text)
 
         result_dict = {
             'title':title,
             'text': text,
             "who" : who,
             'where' : where,
-            'what' : what,
-            'when' : when,
-            'why' : why
+            # 'what' : what,
+            # 'when' : when,
+            # 'why' : why
         }
         return result_dict
 
@@ -370,10 +371,10 @@ class FiveWExtractor(object):
     #     return result_dict
 
     def prettyPrint5w(self, result):
-        print("\nExtracted 5W from: "+result['title'])
+        # print("\nExtracted 5W from: "+result['title'])
         print()
         if result['who']:
-            print("WHO is in the news?: ",result['who'])
+            print("WHO is involved in the news?: ",result['who'])
         else:
             print("Sorry, can not detect the WHO in the news")
 
@@ -382,28 +383,28 @@ class FiveWExtractor(object):
         else:
             print("Sorry, can not detect the WHERE in the news")
 
-        if result['when']:
-            print("WHEN did the event in the news happen: ",result['when'])
-        else:
-            print("Sorry, can not detect the WHEN in the news")
+        # if result['when']:
+        #     print("WHEN did the event in the news happen: ",result['when'])
+        # else:
+        #     print("Sorry, can not detect the WHEN in the news")
 
-        if not result['who']:
-            print("WHAT in the news is not detected, because the WHO element in the news was not detected")
-        else:
-            print("WHAT is the event that happened in the news: ",result['what'])
+        # if not result['who']:
+        #     print("WHAT in the news is not detected, because the WHO element in the news was not detected")
+        # else:
+        #     print("WHAT's happening in the news: ",result['what'])
 
-        if not result['why']:
-            if not result['what']:
-                print("WHY in the news is not detected, because the WHAT element in the news was not detected")
-            else:
-                print("Sorry, can not detect the WHY in the news")
-        else:
-            print("WHY did the event in the news happen: ",result['why'])
+        # if not result['why']:
+        #     if not result['what']:
+        #         print("WHY in the news is not detected, because the WHAT element in the news was not detected")
+        #     else:
+        #         print("Sorry, can not detect the WHY in the news")
+        # else:
+        #     print("WHY did the event in the news happen: ",result['why'])
 
 fw = FiveWExtractor()
 
-# title = "It's official: Prabowo to join 2019 race"
-# text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday.His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo.\"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician.Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties.Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience.\"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties.\" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again.Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy.The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote.Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate.Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD).PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
+title = "It's official: Prabowo to join 2019 race"
+text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday. His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo. \"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician. Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties. Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience. \"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties. \" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again. Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy. The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote. Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate. Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD). PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
 
 
 # print("Input the title of the news:")
@@ -414,8 +415,8 @@ fw = FiveWExtractor()
 
 # print(fw.extractWhoOrWhere(text,title,))
 
-title = "Actress Titi Qadarsih passes away after battle with colon cancer"
-text = """Veteran actress Titi Qadarsih passed away on Monday after battling colon cancer. She was 73 years old."Mama has been sick since the fasting month, when the doctor diagnosed her with stage fourcolon cancer," said Indra Q, the late actress's son on Monday, as quoted by kompas.com.Indra said that Titi had been undergoing intensive treatment for the past couple of months, since the diagnosis was made during the fasting month that began in mid-May."We started the treatment around two months ago. The last two weeks were intensive at Fatmawati Hospital," said Indra, who is a BIP band member and Slank's former keyboardist.He said her death came unexpectedly. "Eating has been a bit difficult. But mama was always agile. We never knew, and she finally passed away like this," Indra said.Titi is expected to be buried at Tanah Kusir Cemetery in Kebayoran Lama, South Jakarta. Throughout her life, Titi was known for her diverse skills in the entertainment world, ranging from acting in movies, singing, dancing to modeling.Titi made her debut on the big screen in the 1996 movie Hancurnya Petualang(Destroyed Adventurers). She also joined the stage through Teater Koma and sang a duet with Gombloh. (liz/kes)"""
+# title = "Actress Titi Qadarsih passes away after battle with colon cancer"
+# text = """Veteran actress Titi Qadarsih passed away on Monday after battling colon cancer. She was 73 years old."Mama has been sick since the fasting month, when the doctor diagnosed her with stage fourcolon cancer," said Indra Q, the late actress's son on Monday, as quoted by kompas.com.Indra said that Titi had been undergoing intensive treatment for the past couple of months, since the diagnosis was made during the fasting month that began in mid-May."We started the treatment around two months ago. The last two weeks were intensive at Fatmawati Hospital," said Indra, who is a BIP band member and Slank's former keyboardist.He said her death came unexpectedly. "Eating has been a bit difficult. But mama was always agile. We never knew, and she finally passed away like this," Indra said.Titi is expected to be buried at Tanah Kusir Cemetery in Kebayoran Lama, South Jakarta. Throughout her life, Titi was known for her diverse skills in the entertainment world, ranging from acting in movies, singing, dancing to modeling.Titi made her debut on the big screen in the 1996 movie Hancurnya Petualang(Destroyed Adventurers). She also joined the stage through Teater Koma and sang a duet with Gombloh. (liz/kes)"""
 fw.prettyPrint5w(fw.extract5w(text,title))
 
 # print(fw.nlp.getIdnNER(text))

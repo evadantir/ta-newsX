@@ -5,6 +5,7 @@ from nltk.tokenize import sent_tokenize
 import re
 import numpy as np
 import os
+import string
 from preprocessing import Preprocess
 from nlp_helper import NLPHelper
 import openpyxl
@@ -23,6 +24,7 @@ class FeatureExtractor(object):
         list_person = []
         list_loc = []
         list_org = []
+        dont_remove_punct = ".,'_"
 
         # temporary variable for each people org and loc
         per = []
@@ -41,19 +43,29 @@ class FeatureExtractor(object):
                 loc.append(data[i][0])
             else: 
                 if per:
-                    tempdict["entity"] = ' '.join(per)
+                    # print(per)
+                    join_entity = ' '.join(per)
+                    filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                    tempdict["entity"] = filter_punctuation
                     tempdict["type"] = "PERSON"
                     list_person.append(tempdict)
                     #empty temp array
                     per = []
                 elif org:
-                    tempdict["entity"] = ' '.join(org)
+                    # print(org)
+                    join_entity = ' '.join(org)
+                    filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                    # filter_punctuation = re.sub(r"(?<=[^\w.,'_]) ",r"",join_entity)
+                    tempdict["entity"] = filter_punctuation
                     tempdict["type"] = "ORGANIZATION"
                     list_org.append(tempdict)
                     #empty temp array
                     org = []
                 elif loc:
-                    tempdict["entity"] = ' '.join(loc)
+                    # print(loc)
+                    join_entity = ' '.join(loc)
+                    filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                    tempdict["entity"] = filter_punctuation
                     tempdict["type"] = "LOCATION"
                     list_loc.append(tempdict)
                     #empty temp array
@@ -65,7 +77,8 @@ class FeatureExtractor(object):
         list_org = self.pre.removeDuplicateListDict(list_org)
 
         entities = list_loc + list_person + list_org
-
+        print(entities)
+        exit()
         return entities
 
     def findNounPhraseFromTitle(self,title,entities):
@@ -127,24 +140,32 @@ class FeatureExtractor(object):
 
         #for every entities
         for i in range(len(entities)):
-            # dist = []
-            dist = 0
+            dist = []
+            # dist = 0
             #for every sentences
             for j in range(len(sent_list)):
                 #find how many times entities found in each sentence
-                match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent_list[j].lower())
-                if match:
+                # match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent_list[j].lower())
+                # if match:
+                if entities[i]["entity"] in sent_list[j]:
+                    print("Entity:\t",entities[i]["entity"])
+                    print("Sentences:\t",sent_list[j])
                     # n of entity in sentence * index of sentences
-                    dist  = dist + (len(match)*(j+1))
-                    # dist = i
+                    # dist  = dist + (len(match)*(j+1))
+                    print("pos:",i)
+                    dist.append(i+1)
             
-            # if dist == 0:
-            #     print(entities[i])
+            if dist == 0:
+                print("zero dist: ",entities[i])
+                print()
 
             # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
-            # temp = np.sum(dist)
-            entities[i]["dist"] = float(dist / entities[i]["occ_text"])
-            # entities[i]["dist"] = float(temp / entities[i]["occ_text"])
+            print("List dist:",dist)
+            temp = np.sum(dist)
+            print(temp)
+            print()
+            # entities[i]["dist"] = float(dist / entities[i]["occ_text"])
+            entities[i]["dist"] = float(temp / entities[i]["occ_text"])
         
         return entities
 

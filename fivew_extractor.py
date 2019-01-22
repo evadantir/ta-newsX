@@ -326,21 +326,21 @@ class FiveWExtractor(object):
         who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
         print("\nExtracting WHERE...")
         where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
-        # when = self.extractWhenFromText(text,ner_coref['ner'])
-        # if who:
-        #     what = self.extractWhatFromText(who,title,text)
-        # else:
-        #     what = None
-        # why = self.extractWhyFromText(what,text)
+        when = self.extractWhenFromText(text,ner_coref['ner'])
+        if who:
+            what = self.extractWhatFromText(who,title,text)
+        else:
+            what = None
+        why = self.extractWhyFromText(what,text)
 
         result_dict = {
             'title':title,
             'text': text,
             "who" : who,
             'where' : where,
-            # 'what' : what,
-            # 'when' : when,
-            # 'why' : why
+            'what' : what,
+            'when' : when,
+            'why' : why
         }
         return result_dict
 
@@ -383,23 +383,23 @@ class FiveWExtractor(object):
         else:
             print("Sorry, can not detect the WHERE in the news")
 
-        # if result['when']:
-        #     print("WHEN did the event in the news happen: ",result['when'])
-        # else:
-        #     print("Sorry, can not detect the WHEN in the news")
+        if result['when']:
+            print("WHEN did the event in the news happen: ",result['when'])
+        else:
+            print("Sorry, can not detect the WHEN in the news")
 
-        # if not result['who']:
-        #     print("WHAT in the news is not detected, because the WHO element in the news was not detected")
-        # else:
-        #     print("WHAT's happening in the news: ",result['what'])
+        if not result['who']:
+            print("WHAT in the news is not detected, because the WHO element in the news was not detected")
+        else:
+            print("WHAT's happening in the news: ",result['what'])
 
-        # if not result['why']:
-        #     if not result['what']:
-        #         print("WHY in the news is not detected, because the WHAT element in the news was not detected")
-        #     else:
-        #         print("Sorry, can not detect the WHY in the news")
-        # else:
-        #     print("WHY did the event in the news happen: ",result['why'])
+        if not result['why']:
+            if not result['what']:
+                print("WHY in the news is not detected, because the WHAT element in the news was not detected")
+            else:
+                print("Sorry, can not detect the WHY in the news")
+        else:
+            print("WHY did the event in the news happen: ",result['why'])
 
 fw = FiveWExtractor()
 

@@ -77,8 +77,8 @@ class FeatureExtractor(object):
         list_org = self.pre.removeDuplicateListDict(list_org)
 
         entities = list_loc + list_person + list_org
-        print(entities)
-        exit()
+        # print(entities)
+        # exit()
         return entities
 
     def findNounPhraseFromTitle(self,title,entities):
@@ -148,11 +148,11 @@ class FeatureExtractor(object):
                 # match = re.findall(r'\b'+re.escape(entities[i]["entity"].lower()) + r'\b',sent_list[j].lower())
                 # if match:
                 if entities[i]["entity"] in sent_list[j]:
-                    print("Entity:\t",entities[i]["entity"])
-                    print("Sentences:\t",sent_list[j])
+                    # print("Entity:\t",entities[i]["entity"])
+                    # print("Sentences:\t",sent_list[j])
                     # n of entity in sentence * index of sentences
                     # dist  = dist + (len(match)*(j+1))
-                    print("pos:",i)
+                    # print("pos:",i)
                     dist.append(i+1)
             
             if dist == 0:
@@ -160,10 +160,10 @@ class FeatureExtractor(object):
                 print()
 
             # find disribution of entity with (n of entity in sentence * index of sentences)/frequency of entity in text
-            print("List dist:",dist)
+            # print("List dist:",dist)
             temp = np.sum(dist)
-            print(temp)
-            print()
+            # print(temp)
+            # print()
             # entities[i]["dist"] = float(dist / entities[i]["occ_text"])
             entities[i]["dist"] = float(temp / entities[i]["occ_text"])
         

@@ -19,6 +19,35 @@ class ModelTrainer(object):
         dataset['occ_title'] = dataset['occ_title'].map({False: 0, True: 1}).astype(int)
         return dataset
 
+    def evaluateModelLocal(self,dataset,drop_element,model):
+        # extract feature needed, drop entity
+        dataset = dataset.drop(['entity',drop_element], axis=1)
+
+        dataset = self.convertToNumeric(dataset)
+
+        # determine wich column is feature or label
+        # X itu fitur
+        X = dataset.iloc[:, :-1] # [x = take  entire row, y = take all column except last column]
+        # y itu label
+        y = dataset.iloc[:, -1]  # [x = take entire row, y = last column only]
+
+        # get training score using cross validation
+        # result = self.nFoldCrossValidation(X, y, clf, nfold=10)
+        result = self.getEvaluationScore(X,y,model)
+        
+        if drop_element == 'who':
+            # training and save into pickle
+            # joblib.dump(clf,'model/evallocal_where_idnhalf.pkl')
+            # print ("Model for WHERE has been saved")
+            # ut.convertToExcel("./result/evalloc_halfidn_WHERE.xlsx",result,"Sheet1")
+            print("Evaluation for WHERE model is done!")
+        elif drop_element == 'where':
+            # training and save into pickle
+            # joblib.dump(clf,'model/evalloc_who_idnhalf.pkl')
+            # print ("Model for WHO has been saved")
+            # ut.convertToExcel("./result/evalloc_halfidn_WHO.xlsx",result,"Sheet1")
+            print("Evaluation for WHO model is done!")
+
     def train(self,dataset,drop_element):
         #classifier algorithm, n_estimator = jumlah tree, random_state= angka apapun, sengaja didefine biar hasilnya tetap sama
         clf = RandomForestClassifier(n_estimators=10, random_state=42)
@@ -34,30 +63,24 @@ class ModelTrainer(object):
         # y itu label
         y = dataset.iloc[:, -1]  # [x = take entire row, y = last column only]
 
-        # get training score with train test split (cara biasa)
-        # self.getTrainingScore(X, y, clf)
-
         # get training score using cross validation
         result = self.nFoldCrossValidation(X, y, clf, nfold=10)
         
         if drop_element == 'who':
             # training and save into pickle
-            joblib.dump(clf,'model/train_where_idnhalf.pkl')
+            joblib.dump(clf,'model/train_where_default.pkl')
             print ("Model for WHERE has been saved")
-            ut.convertToExcel("./result/idnhalf_WHERE_result_10fold.xlsx",result,"Sheet1")
+            self.ut.convertToExcel("./result/scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
             print("Cross Validation for WHERE model has been saved to excel file!")
         elif drop_element == 'where':
             # training and save into pickle
-            joblib.dump(clf,'model/train_who_idnhalf.pkl')
+            joblib.dump(clf,'model/train_who_default.pkl')
             print ("Model for WHO has been saved")
-            ut.convertToExcel("./result/idnhalf_WHO_result_10fold.xlsx",result,"Sheet1")
+            self.ut.convertToExcel("./result/scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
             print("Cross Validation for WHO model has been saved to excel file!")
 
     # classic method
-    def getTrainingScore(self, X, y, model):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=5)
-        model.fit(X_train, y_train)
-
+    def getEvaluationScore(self, X_test, y_test, model):
         y_pred = model.predict(X_test)
         # otak atik aja datanya, gimana biar nilainya jadi ga 0 lagi, undersampling oversampling ?
         print("Accuracy: ", (accuracy_score(y_test, y_pred) * 100).round(4))
@@ -145,11 +168,24 @@ class ModelTrainer(object):
 
         return df_fold
 
-tr = ModelTrainer()
-ut = Utility()
+    def evaluateWithTestData(self):
+        dataset = pd.read_excel('local_feature.xlsx', sheet_name='Sheet1')
 
-# reading excel that contain features (HARUS DIKASIH KOLOM WHO DAN WHERE DULU, DAN DITENTUKAN YANG MANA WHO DAN WHERE)
-df = pd.read_excel('idnnerhalf_goldendata_extracted_feature.xlsx', sheet_name='Sheet1')
-# training model for detecting who and where, input "where" or "who" meaning that column will be dropped (deleted)
-who = tr.train(df,'where')
-where = tr.train(df,'who')
+        # # scenario 1
+        # model_where = joblib.load('model/train_where_idnhalf.pkl')
+        # model_who = joblib.load('model/train_who_idnhalf.pkl')
+
+        # scenario 2
+        # model_where = joblib.load('model/train_where_idnfull.pkl')
+        # model_who = joblib.load('model/train_who_idnfull.pkl')
+
+        # scenario 3
+        model_where = joblib.load('model/train_where_default.pkl')
+        model_who = joblib.load('model/train_who_default.pkl')
+
+        tr.evaluateModelLocal(dataset,'where',model_who)
+        tr.evaluateModelLocal(dataset,'who',model_where)
+
+tr = ModelTrainer()
+
+

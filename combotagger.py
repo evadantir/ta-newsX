@@ -21,9 +21,9 @@ class NERComboTagger(StanfordNERTagger):
             '-tokenizerOptions',
             '\"tokenizeNLs=false\"']
 
-# classifier_path2 = "stanford/id-ner-model-id.ser.gz"
-# classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
+classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
+classifier_path2 = "stanford/id-ner-model-id.ser.gz"
 
-# ner_jar_path = "stanford/stanford-ner.jar"
+ner_jar_path = "stanford/stanford-ner.jar"
 
-# st = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2)
+st = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2)

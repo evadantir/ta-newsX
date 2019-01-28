@@ -38,6 +38,7 @@ class FiveWExtractor(object):
             'ner' : ner,
             'coref' : coref,
         }
+        print(nlp_dict)
         
         return nlp_dict
 
@@ -309,13 +310,13 @@ class FiveWExtractor(object):
         # who_model = "./model/train_who_idnhalf.pkl"
         # where_model = "./model/train_where_idnhalf.pkl"
 
-        # # scenario 2:
+        # # # scenario 2:
         who_model = "./model/train_who_idnfull.pkl"
         where_model = "./model/train_where_idnfull.pkl"
 
         # # scenario 3:
-        # who_model = "./model/train_who.pkl"
-        # where_model = "./model/train_where.pkl"
+        # who_model = "./model/train_who_default.pkl"
+        # where_model = "./model/train_where_default.pkl"
 
         print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
 
@@ -344,31 +345,45 @@ class FiveWExtractor(object):
         }
         return result_dict
 
-    # def extract5wLocalNews(self,text,title):
+    def extract5wLocalNews(self,text,title):
 
+        # getting ML model for classifying who and where 
+        # scenario 1:
+        # who_model = "./model/train_who_idnhalf.pkl"
+        # where_model = "./model/train_where_idnhalf.pkl"
 
-    #     # getting NER and Coref of the text
-    #     ner_coref = self.extractINANerAndCoref(text,title)
-    #     # extracting 5w
-    #     who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
-    #     where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
-    #     when = self.extractWhenFromText(text,ner_coref['ner'])
-    #     if who:
-    #         what = self.extractWhatFromText(who,title,text)
-    #     else:
-    #         what = None
-    #     why = self.extractWhyFromText(what,text)
+        # # scenario 2:
+        # who_model = "./model/train_who_idnfull.pkl"
+        # where_model = "./model/train_where_idnfull.pkl"
 
-    #     result_dict = {
-    #         'title':title,
-    #         'text': text,
-    #         "who" : who,
-    #         'where' : where,
-    #         'what' : what,
-    #         'when' : when,
-    #         'why' : why
-    #     }
-    #     return result_dict
+        # # scenario 3:
+        who_model = "./model/train_who_default.pkl"
+        where_model = "./model/train_where_default.pkl"
+
+        print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
+
+        # getting NER and Coref of the text
+        ner_coref = self.extractINANerAndCoref(text,title)
+        # extracting 5w
+        who = self.extractWhoOrWhere(text,title,who_model,ner_coref)
+        where = self.extractWhoOrWhere(text,title,where_model,ner_coref)
+        when = self.extractWhenFromText(text,ner_coref['ner'])
+        if who:
+            what = self.extractWhatFromText(who,title,text)
+        else:
+            what = None
+        why = self.extractWhyFromText(what,text)
+
+        result_dict = {
+            'title':title,
+            'text': text,
+            "who" : who,
+            'where' : where,
+            'what' : what,
+            'when' : when,
+            'why' : why
+        }
+        return result_dict
 
     def prettyPrint5w(self, result):
         # print("\nExtracted 5W from: "+result['title'])
@@ -403,8 +418,8 @@ class FiveWExtractor(object):
 
 fw = FiveWExtractor()
 
-title = "It's official: Prabowo to join 2019 race"
-text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday. His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo. \"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician. Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties. Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience. \"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties. \" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again. Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy. The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote. Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate. Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD). PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
+# title = "It's official: Prabowo to join 2019 race"
+# text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his party's mandate to run for the presidency at its national coordination meeting in Hambalang, West Java, on Wednesday. His decision ended speculation over whether he was considering sitting the election out to endorse another candidate in the 2019 race. It also increased the likelihood that the upcoming election sees a rematch between the former commander of the Army's Special Forces and President Joko \"Jokowi\" Widodo. \"As the party's mandatary, as the holder of your mandate [...] I declare that I have submitted and complied with your decision,\" Prabowo said in a video of the closed-door meeting provided by a Gerindra politician. Earlier in the day, the opposition leader made it clear that he would only contest the election if the party built a strong alliance with other parties. Arriving to the meeting's main stage on horseback, to the strains of a brassy rendition of traditional marching song \"The British Grenadiers\", Prabowo cut an imposing figure in Gerindra's trademark white shirt, khaki pants, and black peci fez. \"With all my energy, body and soul, if Gerindra orders me to run in the upcoming presidential election, I am ready to carry out that task,\" he said, according to a Gerindra politician that was present, to the applause of the party members in attendance, who broke out in chants of \"Prabowo, president!\"Prabowo cut off the chanting, however, and asked for patience. \"I said 'if', 'if the party orders me,'\" he said. \"There is one condition. Even if the party orders me [to run], I need the support of friendly parties. \" Over the past few weeks, Prabowo has seemed hesitant over whether to run against President Jokowi again. Maksimus Ramses Lalongkoe, the executive director of the Institute of Indonesian Political Analysis, said Prabowo's apparent hesitation rested mostly on the lack of a clear coalition backing his candidacy. The 2017 Elections Law specifies that political parties seeking to nominate a presidential candidate are required to secure at least 20 percent of seats at the House of Representatives or 25 percent of the popular vote. Gerindra currently holds only 13 percent of House seats and 11.81 percent of the popular vote, which means it needs to join forces with other parties to be able to nominate Prabowo or any other potential candidate. Four parties with significant vote shares have yet to officially back a candidate: the National Mandate Party (PAN), the Prosperous Justice Party (PKS), the National Awakening Party (PKB) and the Democratic Party (PD). PAN and the PKS have worked together with Gerindra in recent times, most notably during the contentious Jakarta gubernatorial election last year. "
 
 
 # print("Input the title of the news:")
@@ -417,6 +432,11 @@ text = "Gerindra Party chairman and chief patron Prabowo Subianto accepted his p
 
 # title = "Actress Titi Qadarsih passes away after battle with colon cancer"
 # text = """Veteran actress Titi Qadarsih passed away on Monday after battling colon cancer. She was 73 years old."Mama has been sick since the fasting month, when the doctor diagnosed her with stage fourcolon cancer," said Indra Q, the late actress's son on Monday, as quoted by kompas.com.Indra said that Titi had been undergoing intensive treatment for the past couple of months, since the diagnosis was made during the fasting month that began in mid-May."We started the treatment around two months ago. The last two weeks were intensive at Fatmawati Hospital," said Indra, who is a BIP band member and Slank's former keyboardist.He said her death came unexpectedly. "Eating has been a bit difficult. But mama was always agile. We never knew, and she finally passed away like this," Indra said.Titi is expected to be buried at Tanah Kusir Cemetery in Kebayoran Lama, South Jakarta. Throughout her life, Titi was known for her diverse skills in the entertainment world, ranging from acting in movies, singing, dancing to modeling.Titi made her debut on the big screen in the 1996 movie Hancurnya Petualang(Destroyed Adventurers). She also joined the stage through Teater Koma and sang a duet with Gombloh. (liz/kes)"""
-fw.prettyPrint5w(fw.extract5w(text,title))
+# fw.prettyPrint5w(fw.extract5w(text,title))
+
+text = "Malea Emma Tjandrawidjaja, the 7-year-old Indonesian prodigy who amazed the crowd at the StubHub Center stadium in Los Angeles back in September, participated in an auditionfor American Idol on Oct. 14 in Coeur d'Alene, Idaho. Wearing a dress, Malea stoodbefore the judges  Lionel Richie, Katy Perry and Luke Bryan  accompanied by host Ryan Seacrest. She performed the United States' national anthem \"The Star-Spangled Banner\" and Aretha Franklin's \"Think\" garnering praise and standing ovations from the celebrated singers. \"You made Ryan cry!\" said Perry after Malea had finished singing the national anthem.Arman Tjandrawidjaja, Malea's father, told The Jakarta Post via email that Malea received a golden ticket, meaning that she could go to Hollywood  but in 2027. \"Because she has to be 15 years old [by June 1]to compete,\" Arman said. As the time of writing, Malea's Idol audition had been liked by more than 2.000 users on YouTube. The young singer reportedly caught Seacrest's attention due to her interview with David Muir from ABC World News following her StubHub Center Stadium performance. At that time Muir encouraged Seacrest to watch the show as there was a 7-year-old girl \"who is definitely an American Idol\". Arman stated that Seacrest had watched the show and noticed Malea's video as well. \"He then contacted American Idol's producers to invite Malea for an audition,\" Arman said, adding that Seacrest once interviewed her daughter on the On Air with Ryan Seacrest radio show back in September. Recently Seacrest shared his story about the audition alongside presenter Kelly Ripa on Live with Kelly and Ryan. \"She went full Christina Aguilera,\" said Seacrest, recalling the audition. \"They [the judges] loved it;they thought it was very cute, but it was because David [Muir] said on the air.\" Malea is scheduled to perform in several events until November, among them a Los Angeles Clippers game at the Staples Center in Los Angeles on Oct. 21, Skechers Pier to Pier Friendship Walk in Manhattan Beach on Oct. 28, SEMA Show Industry Awards Banquet in Las Vegas on Nov. 1 and a Los Angeles Lakers game at the Staples Center in Los Angeles on Nov. 25."
+title = "Malea Emma Tjandrawidjaja stuns 'American Idol' judges"
 
 # print(fw.nlp.getIdnNER(text))
+
+fw.prettyPrint5w(fw.extract5w(text,title))

@@ -2,13 +2,16 @@ import os
 import pandas as pd
 from utility_code import Utility
 from fivew_extractor import FiveWExtractor
+from feature_extractor import FeatureExtractor
+from nlp_helper import NLPHelper
 
 class EvaluateNews(object):
 
     def __init__(self):
         self.ut = Utility()
         self.fwe = FiveWExtractor()
-
+        self.fex = FeatureExtractor()
+        self.nlp = NLPHelper()
 
     def evaluateGoldenDatasetNews(self, file_range=None):
         # filerange = (0, 10)
@@ -51,12 +54,26 @@ class EvaluateNews(object):
         temp['when'] = data['extracted'].apply(lambda x: x['when'])
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
-        self.ut.convertToExcel("eksperimen2_localnews_evaluate.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("eksperimen3_default_localnews_evaluate.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
+
+    def evaluateWhoWhereLocalNews(self,filename):
+        data = self.ut.loadCSV(filename,',',"ISO-8859-1")
+
+        data['ner'] = data['text'].apply(lambda x: self.nlp.getNER(x))
+        data['coref'] = data['text'].apply(lambda x: self.nlp.getCoref(x))
+
+        feature = pd.DataFrame()
+        for i in range(data.shape[0]):
+            feature = feature.append(self.fex.extractFeaturesDirectFromText(data.iloc[i]), ignore_index=True)
+
+        #     print(entities)
+        self.ut.convertToExcel("3default_local_feature.xlsx",feature,'Sheet1')
 
 ev = EvaluateNews()
 
 
 # ev.evaluateGoldenDatasetNews(file_range=(0,88))
-ev.evaluateLocalNews("beritalokal.csv")
+# ev.evaluateLocalNews("beritalokal.csv")
+ev.evaluateWhoWhereLocalNews("beritalokal.csv")

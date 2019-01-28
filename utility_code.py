@@ -25,8 +25,8 @@ class Utility(object):
         return pkl
 
         # reading CSV 
-    def loadCSV(self, filename,separator,encode="utf-8"):
-        dataset = pd.read_csv(filename, sep=separator,encoding=encode)
+    def loadCSV(self, filename,delimiter,encode="utf-8"):
+        dataset = pd.read_csv(filename,skipinitialspace=True,sep='\s+,\s+',delimiter=delimiter,encoding=encode)
         return dataset
 
 util = Utility()

@@ -19,9 +19,13 @@ class NLPHelper(object):
     def __init__(self):
         
         classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
-        classifier_path2 = "stanford/id-ner-model-id.ser.gz"
-        # classifier_path2 = "stanford/id-ner-model-2.ser.gz"
+
+        # scenario 1
         # classifier_path2 = "stanford/id-ner-model-half.ser.gz"
+        # scenario 2
+        classifier_path2 = "stanford/id-ner-model-id.ser.gz"
+        # scenario 3
+        # classifier_path2 = "stanford/id-ner-model-2.ser.gz"
         ner_jar_path = "stanford/stanford-ner.jar"
 
         # for handling error nltk internals
@@ -43,7 +47,8 @@ class NLPHelper(object):
     # get named entity in text with Stanford English NER tagger
     def getNER(self, text):
         words = word_tokenize(text)
-        ner = self.ner_tagger.tag(words)
+        # ner = self.ner_tagger.tag(words)
+        ner = self.com_tagger.tag(words)
         return ner
 
     # get named entity in text with Stanford English NER tagger + Indonesian tagger
@@ -121,7 +126,12 @@ class NLPHelper(object):
     # saving extracted NER and COREF from news text into a pickle 
     def saveObject(self, nlp_dict):
         # folder = "nlp_object"
-        folder = "idn_pickle_half"
+        # scenario 1
+        # folder = "scenario1_halfidn_pickle"
+        # scenario 2
+        # folder = "scenario2_fullidn_pickle"
+        # # scenario 3
+        folder = "scenario3_stanford_pickle"        
         name = nlp_dict['filename'] + ".pkl"
         joblib.dump(nlp_dict, os.path.join(folder, name))
         print("Inserted text from file " + nlp_dict['filename'])
@@ -154,9 +164,3 @@ class NLPHelper(object):
         return data
 
 nlp = NLPHelper()
-
-# get golden data
-# data = nlp.getGoldenDataset()
-# # extract entity and save into pickle
-# nlp.extractNews(data)
-# nlp.core_nlp.close()

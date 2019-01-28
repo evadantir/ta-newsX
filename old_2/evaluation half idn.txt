@@ -1,0 +1,14 @@
+Accuracy:  92.1296
+Precision:  50.0
+Recall:  11.7647
+F-measure:  19.0476
+Confusion matrix:
+[[197   2]
+ [ 15   2]]
+Accuracy:  92.5926
+Precision:  0.0
+Recall:  0.0
+F-measure:  0.0
+Confusion matrix:
+[[200   4]
+ [ 12   0]]

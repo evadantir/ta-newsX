@@ -46,6 +46,7 @@ class FeatureExtractor(object):
                     # print(per)
                     join_entity = ' '.join(per)
                     filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                    # filter_punctuation = re.sub(r"(?<=\.\(\') ",r"",join_entity)
                     tempdict["entity"] = filter_punctuation
                     tempdict["type"] = "PERSON"
                     list_person.append(tempdict)
@@ -54,8 +55,8 @@ class FeatureExtractor(object):
                 elif org:
                     # print(org)
                     join_entity = ' '.join(org)
+                    # filter_punctuation = re.sub(r"(?<=\.\(\') ",r"",join_entity)
                     filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
-                    # filter_punctuation = re.sub(r"(?<=[^\w.,'_]) ",r"",join_entity)
                     tempdict["entity"] = filter_punctuation
                     tempdict["type"] = "ORGANIZATION"
                     list_org.append(tempdict)
@@ -212,21 +213,4 @@ class FeatureExtractor(object):
 
 e = FeatureExtractor()
 ut = Utility()
-
-# data = e.loadPickle('./nlp_object/0e7ab2ce71c1bce03040ec2388dd45ab069d5432b364495b9cfcfdf5.json.pkl')
-
-# # find feature in one text and save it to excel
-# path = "idn_pickle_half/"
-# filelist = os.listdir(path)
-# data = pd.DataFrame()
-
-# for idx, file in enumerate(filelist):
-
-#     #buka file pickle yang isinya data ner, coref, dan pos dari suatu teks berita
-#     pkl_dict = e.loadPickle(os.path.join(path, file))
-#     # ekstraksi fitur dari file pickle
-#     temp = e.extractFeaturesFromPickle(pkl_dict)
-#     data = data.append(temp)
-    
-# ut.convertToExcel("idnnerhalf_goldendata_extracted_feature.xlsx",data,'Sheet1')
 

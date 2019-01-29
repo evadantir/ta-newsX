@@ -22,6 +22,7 @@ class ModelTrainer(object):
     def evaluateModelLocal(self,dataset,drop_element,model):
         # extract feature needed, drop entity
         dataset = dataset.drop(['entity',drop_element], axis=1)
+        print(dataset)
 
         dataset = self.convertToNumeric(dataset)
 
@@ -40,17 +41,17 @@ class ModelTrainer(object):
             # joblib.dump(clf,'model/evallocal_where_idnhalf.pkl')
             # print ("Model for WHERE has been saved")
             # ut.convertToExcel("./result/evalloc_halfidn_WHERE.xlsx",result,"Sheet1")
-            print("Evaluation for WHERE model is done!")
+            print("Evaluation for WHERE's local model is done!")
         elif drop_element == 'where':
             # training and save into pickle
             # joblib.dump(clf,'model/evalloc_who_idnhalf.pkl')
             # print ("Model for WHO has been saved")
             # ut.convertToExcel("./result/evalloc_halfidn_WHO.xlsx",result,"Sheet1")
-            print("Evaluation for WHO model is done!")
+            print("Evaluation for WHO's local model is done!")
 
     def train(self,dataset,drop_element):
         #classifier algorithm, n_estimator = jumlah tree, random_state= angka apapun, sengaja didefine biar hasilnya tetap sama
-        clf = RandomForestClassifier(n_estimators=10, random_state=42)
+        clf = RandomForestClassifier(n_estimators=10, random_state=42) #coba utak atik
 
         # extract feature needed, drop entity
         dataset = dataset.drop(['entity','id_text',drop_element], axis=1)
@@ -67,21 +68,46 @@ class ModelTrainer(object):
         result = self.nFoldCrossValidation(X, y, clf, nfold=10)
         
         if drop_element == 'who':
+
             # training and save into pickle
-            joblib.dump(clf,'model/train_where_default.pkl')
+            # scenario 1
+            # joblib.dump(clf,'model/scen1_train_where_halfidn.pkl')
+            # # scenario 2
+            # joblib.dump(clf,'model/scen2_train_where_fullidn.pkl')
+            # # scenario 3
+            joblib.dump(clf,'model/scen3_train_where_default.pkl')
             print ("Model for WHERE has been saved")
+
+            # scenario 1
+            # self.ut.convertToExcel("./result/scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
+            # scenario 2
+            # self.ut.convertToExcel("./result/scenario2_fullidn_WHO_10fold.xlsx",result,"Sheet1")
+            # scenario 3
             self.ut.convertToExcel("./result/scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
             print("Cross Validation for WHERE model has been saved to excel file!")
+
         elif drop_element == 'where':
             # training and save into pickle
-            joblib.dump(clf,'model/train_who_default.pkl')
+            # scenario 1
+            # joblib.dump(clf,'model/scen1_train_who_halfidn.pkl')
+            # # scenario 2
+            # joblib.dump(clf,'model/scen2_train_who_fullidn.pkl')
+            # # scenario 3
+            joblib.dump(clf,'model/scen3_train_who_default.pkl')
             print ("Model for WHO has been saved")
+
+            # scenario 1
+            # self.ut.convertToExcel("./result/scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # scenario 2
+            # self.ut.convertToExcel("./result/scenario2_fullidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # # scenario 3
             self.ut.convertToExcel("./result/scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
             print("Cross Validation for WHO model has been saved to excel file!")
 
     # classic method
     def getEvaluationScore(self, X_test, y_test, model):
         y_pred = model.predict(X_test)
+        print(y_pred)
         # otak atik aja datanya, gimana biar nilainya jadi ga 0 lagi, undersampling oversampling ?
         print("Accuracy: ", (accuracy_score(y_test, y_pred) * 100).round(4))
         print("Precision: ", (precision_score(y_test, y_pred) * 100).round(4))
@@ -167,24 +193,6 @@ class ModelTrainer(object):
         print ('F-Score:', f_score)
 
         return df_fold
-
-    def evaluateWithTestData(self):
-        dataset = pd.read_excel('local_feature.xlsx', sheet_name='Sheet1')
-
-        # # scenario 1
-        # model_where = joblib.load('model/train_where_idnhalf.pkl')
-        # model_who = joblib.load('model/train_who_idnhalf.pkl')
-
-        # scenario 2
-        # model_where = joblib.load('model/train_where_idnfull.pkl')
-        # model_who = joblib.load('model/train_who_idnfull.pkl')
-
-        # scenario 3
-        model_where = joblib.load('model/train_where_default.pkl')
-        model_who = joblib.load('model/train_who_default.pkl')
-
-        tr.evaluateModelLocal(dataset,'where',model_who)
-        tr.evaluateModelLocal(dataset,'who',model_where)
 
 tr = ModelTrainer()
 

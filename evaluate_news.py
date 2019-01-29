@@ -4,6 +4,8 @@ from utility_code import Utility
 from fivew_extractor import FiveWExtractor
 from feature_extractor import FeatureExtractor
 from nlp_helper import NLPHelper
+from model_trainer import ModelTrainer
+import joblib
 
 class EvaluateNews(object):
 
@@ -12,6 +14,7 @@ class EvaluateNews(object):
         self.fwe = FiveWExtractor()
         self.fex = FeatureExtractor()
         self.nlp = NLPHelper()
+        self.tr = ModelTrainer()
 
     def evaluateGoldenDatasetNews(self, file_range=None):
         # filerange = (0, 10)
@@ -40,7 +43,7 @@ class EvaluateNews(object):
 
         print("Evaluating golden data is done!")
 
-    def evaluateLocalNews(self,filename):
+    def extract5wLocalNewsForEval(self,filename):
         
         data = self.ut.loadCSV(filename,',',"ISO-8859-1")
 
@@ -54,11 +57,16 @@ class EvaluateNews(object):
         temp['when'] = data['extracted'].apply(lambda x: x['when'])
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
-        self.ut.convertToExcel("eksperimen3_default_localnews_evaluate.xlsx",temp,'Sheet1')
+        # scenario 1
+        self.ut.convertToExcel("scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
+        # scenario 2
+        # self.ut.convertToExcel("scen2_fullidn_evallocalnews.xlsx",temp,'Sheet1')
+        # scenario 3
+        # self.ut.convertToExcel("scen3_default_evallocalnews.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
 
-    def evaluateWhoWhereLocalNews(self,filename):
+    def extractFeatureFromLocalNews(self,filename):
         data = self.ut.loadCSV(filename,',',"ISO-8859-1")
 
         data['ner'] = data['text'].apply(lambda x: self.nlp.getNER(x))
@@ -68,12 +76,35 @@ class EvaluateNews(object):
         for i in range(data.shape[0]):
             feature = feature.append(self.fex.extractFeaturesDirectFromText(data.iloc[i]), ignore_index=True)
 
-        #     print(entities)
-        self.ut.convertToExcel("3default_local_feature.xlsx",feature,'Sheet1')
+        # scenario 1
+        # self.ut.convertToExcel("scen1_halfidn_localfeature.xlsx",feature,'Sheet1')
+        # scenario 2
+        # self.ut.convertToExcel("scen2_fullidn_localfeature.xlsx",feature,'Sheet1')
+        # scenario 3
+        # self.ut.convertToExcel("scen3_default_localfeature.xlsx",feature,'Sheet1')
+
+    def evaluateLocalWhoWhere(self):
+
+        # # scenario 1
+        # dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/scen1_train_where_halfidn.pkl')
+        # model_who = joblib.load('model/scen1_train_who_halfidn.pkl')
+
+        # scenario 2
+        # dataset = pd.read_excel('scen2_fullidn_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/scen2_train_where_fullidn.pkl')
+        # model_who = joblib.load('model/scen2_train_who_fullidn.pkl')
+
+        # scenario 3
+        dataset = pd.read_excel('scen3_default_localfeature.xlsx', sheet_name='Sheet1')
+        model_where = joblib.load('model/scen3_train_where_default.pkl')
+        model_who = joblib.load('model/scen3_train_who_default.pkl')
+
+        self.tr.evaluateModelLocal(dataset,'where',model_who)
+        self.tr.evaluateModelLocal(dataset,'who',model_where)
 
 ev = EvaluateNews()
 
-
-# ev.evaluateGoldenDatasetNews(file_range=(0,88))
-# ev.evaluateLocalNews("beritalokal.csv")
-ev.evaluateWhoWhereLocalNews("beritalokal.csv")
+# ev.extractFeatureFromLocalNews('beritalokal.csv')
+# ev.extract5wLocalNewsForEval("beritalokal.csv")
+# ev.evaluateLocalWhoWhere()

@@ -23,9 +23,9 @@ class NLPHelper(object):
         # scenario 1
         # classifier_path2 = "stanford/id-ner-model-half.ser.gz"
         # scenario 2
-        classifier_path2 = "stanford/id-ner-model-id.ser.gz"
+        # classifier_path2 = "stanford/id-ner-model-id.ser.gz"
         # scenario 3
-        # classifier_path2 = "stanford/id-ner-model-2.ser.gz"
+        classifier_path2 = "stanford/id-ner-model-2.ser.gz"
         ner_jar_path = "stanford/stanford-ner.jar"
 
         # for handling error nltk internals
@@ -33,10 +33,10 @@ class NLPHelper(object):
 
         self.pre = Preprocess()
         self.scp = StanfordParser('./stanford/stanford-parser.jar','./stanford/stanford-parser-3.9.1-models.jar',encoding='utf8')
-        self.ner_tagger = StanfordNERTagger(classifier_path1,ner_jar_path, encoding='utf8')
+        self.ner_tagger = StanfordNERTagger(classifier_path1,ner_jar_path, encoding='utf8') # for scenario 3
         self.pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
         # combining classifier from Stanford with custom classifier
-        self.com_tagger = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2)
+        self.com_tagger = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2) #for scenario 1 and 2
         self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
     # parsing for getting verb phrase
@@ -47,14 +47,15 @@ class NLPHelper(object):
     # get named entity in text with Stanford English NER tagger
     def getNER(self, text):
         words = word_tokenize(text)
-        # ner = self.ner_tagger.tag(words)
         ner = self.com_tagger.tag(words)
+        # ner = self.ner_tagger.tag(words)
         return ner
 
     # get named entity in text with Stanford English NER tagger + Indonesian tagger
     def getIdnNER(self,text):
         words = word_tokenize(text)
         ner = self.com_tagger.tag(words)
+        # ner = self.ner_tagger.tag(words)
         return ner
 
     # get Constituency parsing from text
@@ -99,10 +100,12 @@ class NLPHelper(object):
     # extracting Named Entity and coreference resolution in the text
     def extractNerCoref(self, filename, text, title, fiveWoneH):
         combine = title + '. ' + text
+
         # for default Stanford NER
-        # ner = self.getNER(combine)
+        ner = self.getNER(combine)
+
         # for custom NER (Stanford + IDN)
-        ner = self.getIdnNER(combine)
+        # ner = self.getIdnNER(combine)
         print("NER extraction completed on ", filename)
         try:
             coref = self.getCoref(text)
@@ -126,11 +129,12 @@ class NLPHelper(object):
     # saving extracted NER and COREF from news text into a pickle 
     def saveObject(self, nlp_dict):
         # folder = "nlp_object"
+
         # scenario 1
         # folder = "scenario1_halfidn_pickle"
         # scenario 2
         # folder = "scenario2_fullidn_pickle"
-        # # scenario 3
+        # scenario 3
         folder = "scenario3_stanford_pickle"        
         name = nlp_dict['filename'] + ".pkl"
         joblib.dump(nlp_dict, os.path.join(folder, name))

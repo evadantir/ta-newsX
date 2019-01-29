@@ -20,19 +20,19 @@ class CreateClassifier(object):
         self.mt = ModelTrainer()
 
     def createClassifier(self):
-        # get golden data
+        # # get golden data
         # data = self.nlp.getGoldenDataset()
         # # extract entity and save into pickle
-        # self.nlp.extractNews(data)
-        # self.nlp.core_nlp.close()
+        # self.nlp.extractNews(data)  #CHANGE MODULE WHEN SWITCHING BETWEEN ADDITIONAL IDN AND DEFAULT
+        # # self.nlp.core_nlp.close()
 
-        # find feature in one text and save it to excel
-        # scenario 1
-        # path = "scenario1_halfidn_pickle/"
-        # scenario 2
-        # path = "scenario2_fullidn_pickle/"
+        # # find feature in one text and save it to excel
+        # # scenario 1
+        # # path = "scenario1_halfidn_pickle/"
+        # # scenario 2
+        # # path = "scenario2_fullidn_pickle/"
         # # scenario 3
-        # # path = "scenario3_stanford_pickle/"
+        # path = "scenario3_stanford_pickle/"
         # filelist = os.listdir(path)
         # data = pd.DataFrame()
 
@@ -45,15 +45,22 @@ class CreateClassifier(object):
         #     data = data.append(temp)
 
         # #scenario 1 
-        # # self.ut.convertToExcel("scenario1_idnnerhalf_extracted_feature.xlsx",data,'Sheet1')
+        # self.ut.convertToExcel("scenario1_idnnerhalf_extracted_feature.xlsx",data,'Sheet1')
         # #scenario 2
         # self.ut.convertToExcel("scenario2_idnnerfull_extracted_feature.xlsx",data,'Sheet1')
         # #scenario 3 
         # self.ut.convertToExcel("scenario3_stanford_extracted_feature.xlsx",data,'Sheet1')
 
+
+    # for training use
         # reading excel that contain features (HARUS DIKASIH KOLOM WHO DAN WHERE DULU, DAN DITENTUKAN YANG MANA WHO DAN WHERE)
-        df = pd.read_excel('scenario3_stanford_extracted_feature.xlsx', sheet_name='Sheet1')
-        # training model for detecting who and where, input "where" or "who" meaning that column will be dropped (deleted)
+        # scenario 1
+        # df = pd.read_excel('scenario1_idnnerhalf_extracted_feature.xlsx', sheet_name='Sheet1')
+        # scenario 2
+        df = pd.read_excel('scenario2_idnnerfull_extracted_feature.xlsx', sheet_name='Sheet1')
+        # # scenario 3
+        # df = pd.read_excel('scenario3_stanford_extracted_feature.xlsx', sheet_name='Sheet1')
+        # # training model for detecting who and where, input "where" or "who" meaning that column will be dropped (deleted)
         who = self.mt.train(df,'where')
         where = self.mt.train(df,'who')
         self.nlp.core_nlp.close()

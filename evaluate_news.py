@@ -95,16 +95,51 @@ class EvaluateNews(object):
         # model_where = joblib.load('model/scen2_train_where_fullidn.pkl')
         # model_who = joblib.load('model/scen2_train_who_fullidn.pkl')
 
-        # scenario 3
-        dataset = pd.read_excel('scen3_default_localfeature.xlsx', sheet_name='Sheet1')
-        model_where = joblib.load('model/scen3_train_where_default.pkl')
-        model_who = joblib.load('model/scen3_train_who_default.pkl')
+        # # scenario 3
+        # dataset = pd.read_excel('scen3_default_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/scen3_train_where_default.pkl')
+        # model_who = joblib.load('model/scen3_train_who_default.pkl')
 
-        self.tr.evaluateModelLocal(dataset,'where',model_who)
-        self.tr.evaluateModelLocal(dataset,'who',model_where)
+        # scenario testing
+        dataset = pd.read_excel('scen2_fullidn_localfeature.xlsx', sheet_name='Sheet1')
+        model_where = joblib.load('model/s2_testing_where.pkl')
+        model_who = joblib.load('model/s2_testing_whO.pkl')
+
+        # self.evaluateModelLocal(dataset,'where',model_who)
+        self.evaluateModelLocal(dataset,'who',model_where)
+
+    def evaluateModelLocal(self,dataset,drop_element,model):
+        dataset = self.ut.convertToNumeric(dataset)
+        
+        dataset = dataset.drop(['entity',drop_element], axis=1)
+        dataset = self.ut.oneHotEncoding(dataset)
+
+        # determine wich column is feature or label
+        # X itu fitur
+        X = dataset.iloc[:, :-1] # [x = take  entire row, y = take all column except last column]
+        # y itu label
+        y = dataset.iloc[:, -1]  # [x = take entire row, y = last column only]
+
+        # get training score using cross validation
+        # result = self.nFoldCrossValidation(X, y, clf, nfold=10)
+        result = self.tr.getEvaluationScore(X,y,model)
+        
+        if drop_element == 'who':
+            # training and save into pickle
+            # joblib.dump(clf,'model/evallocal_where_idnhalf.pkl')
+            # print ("Model for WHERE has been saved")
+            # ut.convertToExcel("./result/evalloc_halfidn_WHERE.xlsx",result,"Sheet1")
+            print("Evaluation for WHERE's local model is done!")
+        elif drop_element == 'where':
+            # training and save into pickle
+            # joblib.dump(clf,'model/evalloc_who_idnhalf.pkl')
+            # print ("Model for WHO has been saved")
+            # ut.convertToExcel("./result/evalloc_halfidn_WHO.xlsx",result,"Sheet1")
+            print("Evaluation for WHO's local model is done!")
+
 
 ev = EvaluateNews()
 
 # ev.extractFeatureFromLocalNews('beritalokal.csv')
 # ev.extract5wLocalNewsForEval("beritalokal.csv")
-# ev.evaluateLocalWhoWhere()
+ev.evaluateLocalWhoWhere()

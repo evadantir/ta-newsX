@@ -7,6 +7,8 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedKFold
 import joblib
 from utility_code import Utility
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 
 class ModelTrainer(object):
 
@@ -51,12 +53,20 @@ class ModelTrainer(object):
 
     def train(self,dataset,drop_element):
         #classifier algorithm, n_estimator = jumlah tree, random_state= angka apapun, sengaja didefine biar hasilnya tetap sama
-        clf = RandomForestClassifier(n_estimators=10, random_state=42) #coba utak atik
-
+        clf = RandomForestClassifier(n_estimators=10, random_state=2) #coba utak atik
+        onehot_encoder = OneHotEncoder(categories='auto')
         # extract feature needed, drop entity
         dataset = dataset.drop(['entity','id_text',drop_element], axis=1)
-
+        # convert type to numeric
         dataset = self.convertToNumeric(dataset)
+        # onehot encode the type column (pisahin)
+        type_encoded = onehot_encoder.fit_transform(dataset['type'].values.reshape(-1,1)).toarray()
+        dfOneHot = pd.DataFrame(type_encoded,columns = ["Type_"+str(int(i+1)) for i in range(type_encoded.shape[1])])
+        dataset = dataset.drop('type',axis = 1)
+        dataset = pd.concat([dataset, dfOneHot], axis=1)
+
+        # change order of dataframe alphabetically
+        dataset = dataset.reindex(sorted(dataset.columns), axis=1)
 
         # determine wich column is feature or label
         # X itu fitur
@@ -75,15 +85,19 @@ class ModelTrainer(object):
             # # scenario 2
             # joblib.dump(clf,'model/scen2_train_where_fullidn.pkl')
             # # scenario 3
-            joblib.dump(clf,'model/scen3_train_where_default.pkl')
+            # joblib.dump(clf,'model/scen3_train_where_default.pkl')
+            # testing
+            joblib.dump(clf,'model/s2_testing_where.pkl')
             print ("Model for WHERE has been saved")
 
             # scenario 1
-            # self.ut.convertToExcel("./result/scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
             # scenario 2
-            # self.ut.convertToExcel("./result/scenario2_fullidn_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario2_fullidn_WHERE_10fold.xlsx",result,"Sheet1")
             # scenario 3
-            self.ut.convertToExcel("./result/scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
+             # scenario testing
+            self.ut.convertToExcel("./result/s2_testing_WHERE_10fold.xlsx",result,"Sheet1")           
             print("Cross Validation for WHERE model has been saved to excel file!")
 
         elif drop_element == 'where':
@@ -93,15 +107,19 @@ class ModelTrainer(object):
             # # scenario 2
             # joblib.dump(clf,'model/scen2_train_who_fullidn.pkl')
             # # scenario 3
-            joblib.dump(clf,'model/scen3_train_who_default.pkl')
+            # joblib.dump(clf,'model/scen3_train_who_default.pkl')
+            # testing
+            joblib.dump(clf,'model/s2_testing_whO.pkl')
             print ("Model for WHO has been saved")
 
             # scenario 1
-            # self.ut.convertToExcel("./result/scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
             # scenario 2
-            # self.ut.convertToExcel("./result/scenario2_fullidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario2_fullidn_WHO_10fold.xlsx",result,"Sheet1")
             # # scenario 3
-            self.ut.convertToExcel("./result/scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
+            # scenario testing
+            self.ut.convertToExcel("./result/s2_testing_WHO_10fold.xlsx",result,"Sheet1")  
             print("Cross Validation for WHO model has been saved to excel file!")
 
     # classic method

@@ -21,11 +21,11 @@ class NLPHelper(object):
         classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
 
         # scenario 1
-        # classifier_path2 = "stanford/id-ner-model-half.ser.gz"
+        classifier_path2 = "stanford/id-ner-model-half.ser.gz"
         # scenario 2
         # classifier_path2 = "stanford/id-ner-model-id.ser.gz"
         # scenario 3
-        classifier_path2 = "stanford/id-ner-model-2.ser.gz"
+        # classifier_path2 = "stanford/id-ner-model-2.ser.gz"
         ner_jar_path = "stanford/stanford-ner.jar"
 
         # for handling error nltk internals
@@ -47,8 +47,8 @@ class NLPHelper(object):
     # get named entity in text with Stanford English NER tagger
     def getNER(self, text):
         words = word_tokenize(text)
-        ner = self.com_tagger.tag(words)
-        # ner = self.ner_tagger.tag(words)
+        # ner = self.com_tagger.tag(words)
+        ner = self.ner_tagger.tag(words)
         return ner
 
     # get named entity in text with Stanford English NER tagger + Indonesian tagger

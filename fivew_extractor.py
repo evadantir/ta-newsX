@@ -65,6 +65,9 @@ class FiveWExtractor(object):
         features = self.fex.extractFeaturesDirectFromText(ner_coref)
         # print(features)
         features = self.convertToNumeric(features)
+        features = self.ut.oneHotEncoding(features)
+        # features = features.drop('entity', axis=1)
+
         print(features)
         
         # predicting who or where by it's feature, dropping unused column
@@ -75,7 +78,7 @@ class FiveWExtractor(object):
         for i in range(len(predict_candidate)):
             if predict_candidate[i] == 1:
                 # insert candidate to list
-                candidate.append(features.iloc[i,1])
+                candidate.append(features.iloc[i,5])
         
         return candidate
     
@@ -220,35 +223,39 @@ class FiveWExtractor(object):
         print()
         print("Extracting WHAT...")
         what = []
-        for who in who_candidates:
-            # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
-            match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',title.lower())
-            if match:
-                print("getting subsequent Verb Phrase from title...")
-                anno = list(self.nlp.getConstituencyParsing(title))
-                # print(anno)
-                # returning verb phrase from title
-                for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
-                    what.append(' '.join(sub_tree.leaves()))
-            # If there is no WHO in the headline, we search within the text for the first occurrence of our highest ranked WHO and also take the subsequent verb phrase as WHAT
-            else:
-                sent_list = sent_tokenize(text)
-                for sent in sent_list:
-                    # find first occurrence of who in sentence
-                    match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',sent.lower())
-                    if match:
-                        print("getting subsequent Verb Phrase from sentence...")
-                        # getting verb phrase
-                        anno = list(self.nlp.getConstituencyParsing(sent))
-                        # print(anno)
-                        break
-                # returning verb phrase from text
-                for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
-                    what.append(' '.join(sub_tree.leaves()))
+        if who_candidates:
+            print(who_candidates)
+            for who in who_candidates:
+                # If one of our WHO candidates occurs in the title, we look for the subsequent verb phrase of it
+                if who in title:
+                    print("getting subsequent Verb Phrase from title...")
+                    anno = list(self.nlp.getConstituencyParsing(title))
+                    # print(anno)
+                    # returning verb phrase from title
+                    for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
+                        what.append(' '.join(sub_tree.leaves()))
+                # If there is no WHO in the headline, we search within the text for the first occurrence of our highest ranked WHO and also take the subsequent verb phrase as WHAT
+                else:
+                    sent_list = sent_tokenize(text)
+                    for sent in sent_list:
+                        # find first occurrence of who in sentence
+                        match = re.findall(r'\b'+re.escape(who.lower()) + r'\b',sent.lower())
+                        if match:
+                            print("getting subsequent Verb Phrase from sentence...")
+                            # getting verb phrase
+                            anno = list(self.nlp.getConstituencyParsing(sent))
+                            # print(anno)
+                            break
+                    # returning verb phrase from text
+                    for sub_tree in anno[0].subtrees(lambda t: t.label() == 'VP'):
+                        what.append(' '.join(sub_tree.leaves()))
 
-        what = self.pre.sieveSubstring(what)
+            what = self.pre.sieveSubstring(what)
 
-        return what
+            return what
+        else:
+            return None
+
 
     def extractWhyFromText(self,what_candidates,text):
         print()
@@ -311,12 +318,12 @@ class FiveWExtractor(object):
         # where_model = "./model/scen1_train_where_halfidn.pkl"
 
         # # # scenario 2:
-        who_model = "./model/scen2_train_who_fullidn.pkl"
-        where_model = "./model/scen2_train_where_fullidn.pkl"
+        # who_model = "./model/scen2_train_who_fullidn.pkl"
+        # where_model = "./model/scen2_train_where_fullidn.pkl"
 
         # # scenario 3:
-        # who_model = "./model/scen3_train_who_default.pkl"
-        # where_model = "./model/scen3_train_where_default.pkl"
+        who_model = "./model/scen3_train_who_default.pkl"
+        where_model = "./model/scen3_train_where_default.pkl"
 
         print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
 
@@ -353,12 +360,25 @@ class FiveWExtractor(object):
         # where_model = "./model/scen1_train_where_halfidn.pkl"
 
         # # # scenario 2:
-        who_model = "./model/scen2_train_who_fullidn.pkl"
-        where_model = "./model/scen2_train_where_fullidn.pkl"
+        # who_model = "./model/scen2_train_who_fullidn.pkl"
+        # where_model = "./model/scen2_train_where_fullidn.pkl"
 
         # # scenario 3:
         # who_model = "./model/scen3_train_who_default.pkl"
         # where_model = "./model/scen3_train_where_default.pkl"
+
+        # ------ HO --------
+        # scenario 1:
+        # who_model = "./model/HO_scen1_train_who_halfidn.pkl"
+        # where_model = "./model/HO_scen1_train_where_halfidn.pkl"
+
+        # # # scenario 2:
+        # who_model = "./model/HO_scen2_train_who_fullidn.pkl"
+        # where_model = "./model/HO_scen2_train_where_fullidn.pkl"
+
+        # # scenario 3:
+        who_model = "./model/HO_scen3_train_who_default.pkl"
+        where_model = "./model/HO_scen3_train_where_default.pkl"
 
         print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
 

@@ -58,11 +58,14 @@ class EvaluateNews(object):
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
         # scenario 1
-        self.ut.convertToExcel("scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
+        # self.ut.convertToExcel("scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
+        # self.ut.convertToExcel("HO_scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
         # scenario 2
         # self.ut.convertToExcel("scen2_fullidn_evallocalnews.xlsx",temp,'Sheet1')
+        # self.ut.convertToExcel("HO_scen2_fullidn_evallocalnews.xlsx",temp,'Sheet1')
         # scenario 3
-        # self.ut.convertToExcel("scen3_default_evallocalnews.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("scen3_default_evallocalnews.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("HO_scen3_default_evallocalnews.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
 
@@ -83,7 +86,7 @@ class EvaluateNews(object):
         # scenario 3
         # self.ut.convertToExcel("scen3_default_localfeature.xlsx",feature,'Sheet1')
 
-    def evaluateLocalWhoWhere(self):
+    def evaluateLocalWhoWhere(self,drop_element):
 
         # # scenario 1
         # dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
@@ -100,13 +103,33 @@ class EvaluateNews(object):
         # model_where = joblib.load('model/scen3_train_where_default.pkl')
         # model_who = joblib.load('model/scen3_train_who_default.pkl')
 
-        # scenario testing
-        dataset = pd.read_excel('scen2_fullidn_localfeature.xlsx', sheet_name='Sheet1')
-        model_where = joblib.load('model/s2_testing_where.pkl')
-        model_who = joblib.load('model/s2_testing_whO.pkl')
+        # scenario HO -------------------------------
+        # # # scenario 1
+        dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
+        model_where = joblib.load('model/HO2_scen1_train_where_halfidn.pkl')
+        model_who = joblib.load('model/HO2_scen1_train_who_halfidn.pkl')
 
-        # self.evaluateModelLocal(dataset,'where',model_who)
-        self.evaluateModelLocal(dataset,'who',model_where)
+        # scenario 2
+        # dataset = pd.read_excel('scen2_fullidn_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/HO2_scen2_train_where_fullidn.pkl')
+        # model_who = joblib.load('model/HO2_scen2_train_who_fullidn.pkl')
+
+        # # # scenario 3
+        # dataset = pd.read_excel('scen3_default_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/HO2_scen3_train_where_default.pkl')
+        # model_who = joblib.load('model/HO2_scen3_train_who_default.pkl')
+
+        # scenario test
+        # dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/s2_testing_where.pkl')
+        # model_who = joblib.load('model/s2_testing_who.pkl')
+
+        if drop_element == 'who':
+            self.evaluateModelLocal(dataset,'who',model_where)
+            print("Evaluation for WHERE's local classifier is done!")
+        elif drop_element == 'where':
+            self.evaluateModelLocal(dataset,'where',model_who)
+            print("Evaluation for WHO's local classifier is done!")
 
     def evaluateModelLocal(self,dataset,drop_element,model):
         dataset = self.ut.convertToNumeric(dataset)
@@ -123,23 +146,11 @@ class EvaluateNews(object):
         # get training score using cross validation
         # result = self.nFoldCrossValidation(X, y, clf, nfold=10)
         result = self.tr.getEvaluationScore(X,y,model)
-        
-        if drop_element == 'who':
-            # training and save into pickle
-            # joblib.dump(clf,'model/evallocal_where_idnhalf.pkl')
-            # print ("Model for WHERE has been saved")
-            # ut.convertToExcel("./result/evalloc_halfidn_WHERE.xlsx",result,"Sheet1")
-            print("Evaluation for WHERE's local model is done!")
-        elif drop_element == 'where':
-            # training and save into pickle
-            # joblib.dump(clf,'model/evalloc_who_idnhalf.pkl')
-            # print ("Model for WHO has been saved")
-            # ut.convertToExcel("./result/evalloc_halfidn_WHO.xlsx",result,"Sheet1")
-            print("Evaluation for WHO's local model is done!")
 
 
 ev = EvaluateNews()
 
 # ev.extractFeatureFromLocalNews('beritalokal.csv')
 # ev.extract5wLocalNewsForEval("beritalokal.csv")
-ev.evaluateLocalWhoWhere()
+ev.evaluateLocalWhoWhere('where')
+ev.evaluateLocalWhoWhere('who')

@@ -57,9 +57,9 @@ class CreateClassifier(object):
     # for training use
         # reading excel that contain features (HARUS DIKASIH KOLOM WHO DAN WHERE DULU, DAN DITENTUKAN YANG MANA WHO DAN WHERE)
         # scenario 1
-        df = pd.read_excel('scenario1_idnnerhalf_extracted_feature.xlsx', sheet_name='Sheet1')
+        # df = pd.read_excel('scenario1_idnnerhalf_extracted_feature.xlsx', sheet_name='Sheet1')
         # scenario 2
-        # df = pd.read_excel('scenario2_idnnerfull_extracted_feature.xlsx', sheet_name='Sheet1')
+        df = pd.read_excel('scenario2_idnnerfull_extracted_feature.xlsx', sheet_name='Sheet1')
         # # scenario 3
         # df = pd.read_excel('scenario3_stanford_extracted_feature.xlsx', sheet_name='Sheet1')
         

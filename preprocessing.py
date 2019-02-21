@@ -3,6 +3,7 @@
 import string, re
 import nltk
 from tokenization import *
+from collections import Counter 
 
 class Preprocess():
 
@@ -74,6 +75,21 @@ class Preprocess():
                 new_list.append(dictionary)
 
         return new_list
+
+    def remov_duplicates(self,input): 
+
+        # joins two adjacent elements in iterable way 
+        for i in range(0, len(input)): 
+            input[i] = "".join(input[i]) 
+
+        # now create dictionary using counter method 
+        # which will have strings as key and their 
+        # frequencies as value 
+        UniqW = Counter(input) 
+
+        # # joins two adjacent elements in iterable way 
+        s = " ".join(UniqW.keys()) 
+        return s 
 
     def joinText(self,list_text):
         import string

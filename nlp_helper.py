@@ -21,7 +21,7 @@ class NLPHelper(object):
         classifier_path1 = "stanford/english.muc.7class.distsim.crf.ser.gz"
 
         # scenario 1
-        classifier_path2 = "stanford/id-ner-model-half.ser.gz"
+        # classifier_path2 = "stanford/id-ner-model-half.ser.gz"
         # scenario 2
         # classifier_path2 = "stanford/id-ner-model-id.ser.gz"
         # scenario 3
@@ -36,7 +36,7 @@ class NLPHelper(object):
         self.ner_tagger = StanfordNERTagger(classifier_path1,ner_jar_path, encoding='utf8') # for scenario 3
         self.pos_tagger = StanfordPOSTagger('./stanford/english-bidirectional-distsim.tagger','./stanford/stanford-postagger.jar',encoding='utf8')
         # combining classifier from Stanford with custom classifier
-        self.com_tagger = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2) #for scenario 1 and 2
+        # self.com_tagger = NERComboTagger(classifier_path1,ner_jar_path,stanford_ner_models=classifier_path1+","+classifier_path2) #for scenario 1 and 2
         self.core_nlp = StanfordCoreNLP('http://localhost', port=9000)
 
     # parsing for getting verb phrase
@@ -54,8 +54,8 @@ class NLPHelper(object):
     # get named entity in text with Stanford English NER tagger + Indonesian tagger
     def getIdnNER(self,text):
         words = word_tokenize(text)
-        ner = self.com_tagger.tag(words)
-        # ner = self.ner_tagger.tag(words)
+        # ner = self.com_tagger.tag(words)
+        ner = self.ner_tagger.tag(words)
         return ner
 
     # get Constituency parsing from text

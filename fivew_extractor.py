@@ -65,7 +65,7 @@ class FiveWExtractor(object):
         features = self.fex.extractFeaturesDirectFromText(ner_coref)
         # print(features)
         features = self.convertToNumeric(features)
-        features = self.ut.oneHotEncoding(features)
+        # features = self.ut.oneHotEncoding(features)
         # features = features.drop('entity', axis=1)
 
         print(features)
@@ -78,7 +78,8 @@ class FiveWExtractor(object):
         for i in range(len(predict_candidate)):
             if predict_candidate[i] == 1:
                 # insert candidate to list
-                candidate.append(features.iloc[i,5])
+                # candidate.append(features.iloc[i,5]) # !! FOR ONE HOT ENCODING ONLY
+                candidate.append(features.iloc[i,1])
         
         return candidate
     
@@ -358,14 +359,20 @@ class FiveWExtractor(object):
         # scenario 1:
         # who_model = "./model/scen1_train_who_halfidn.pkl"
         # where_model = "./model/scen1_train_where_halfidn.pkl"
+        # who_model = "./model/3_scen1_train__whewho_halfidn.pkl"
+        # where_model = "./model/3_scen1_trainre_halfidn.pkl"
 
         # # # scenario 2:
         # who_model = "./model/scen2_train_who_fullidn.pkl"
         # where_model = "./model/scen2_train_where_fullidn.pkl"
+        # who_model = "./model/3_scen2_train_who_fullidn.pkl"
+        # where_model = "./model/3_scen2_train_where_fullidn.pkl"
 
         # # scenario 3:
         # who_model = "./model/scen3_train_who_default.pkl"
         # where_model = "./model/scen3_train_where_default.pkl"
+        # who_model = "./model/3_scen3_train_who_default.pkl"
+        # where_model = "./model/3_scen3_train_where_default.pkl"
 
         # ------ HO --------
         # scenario 1:
@@ -377,8 +384,8 @@ class FiveWExtractor(object):
         # where_model = "./model/HO_scen2_train_where_fullidn.pkl"
 
         # # scenario 3:
-        who_model = "./model/HO_scen3_train_who_default.pkl"
-        where_model = "./model/HO_scen3_train_where_default.pkl"
+        # who_model = "./model/HO_scen3_train_who_default.pkl"
+        # where_model = "./model/HO_scen3_train_where_default.pkl"
 
         print("Using " + who_model + " as WHO classifier and " + where_model + " as WHERE classifier\n")
 
@@ -463,9 +470,9 @@ fw = FiveWExtractor()
 # text = "Two people were killed and 12 others injured after a landslide buried a house in Ban village, Karangasem, Bali, on Sunday, following torrential rain. All the victims were members of the same family. The dead victims were identified as Ni Ketut Puspa Wati, 28, and Ni Komang Mertini, 19. The Bali Disaster Mitigation Agency reported that a 6-meter hillside behind the house slumped and buried the house while the family watched television on Sunday evening. \"All the family members were in the house and were trapped inside,\" the agency's head, Dewa Putu Mantera said. Around 15 minutes later, one of the residents, I Komang Andre, escaped from the house and raised the alarm among neighbors. \"A joint operation was immediately conducted by Karangasem Disaster Mitigation Agency and the police, as well as the Search and Rescue Agency,\" he said. Dewa said four victims were receiving medical treatment at Karangasem Hospital while other victims were treated at the community health center (puskesmas). Several hydro-meteorological disasters, such as floods and landslides primarily caused by wind and rain, have hit Indonesia in recent days. Dozens of people have been killed and thousands displaced since last week. The Meteorology, Climatology and Geophysics Agency (BMKG) had previously warned that statistically, January and February is the peak time for hydro-meteorological disasters, given the rainfall patterns over the last 20 years. \"The rainy season has begun in almost all regions in Indonesia, with a tendency for extreme rain. There are also other factors, such as tropical cyclones, urban spatial planning and administrative readiness to minimize the impact,\" BMKG spokesman Taufan Maulana told The Jakarta Post on Monday. National Disaster Mitigation Agency (BNPB) spokesperson Sutopo Purwo Nugroho said deforestation and damage to watersheds had contributed to the increasing number of hydro-meteorological disasters over the years. The agency recorded that the worst disaster in the past week was in South Sulawesi, with at least 69 people killed and 6,700 others displaced in floods and landslides that hit 12 regencies and one city across the province. Of these deaths, 46 were in Gowa, 14 in Jeneponto, four in Maros and one in the provincial capital of Makassar."
 # print(fw.nlp.getIdnNER(text))
 
-# title = input()
-# text= input()
-# fw.prettyPrint5w(fw.extract5w(text,title))
+title = input()
+text= input()
+fw.prettyPrint5w(fw.extract5wLocalNews(text,title))
 # combine =title +' '+ text
 # print(fw.nlp.getNER(combine))
 # fw.nlp.core_nlp.close()

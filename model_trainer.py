@@ -22,7 +22,7 @@ class ModelTrainer(object):
         dataset = dataset.drop(['entity','id_text',drop_element], axis=1)
         # convert type to numeric
         dataset = self.ut.convertToNumeric(dataset)
-        dataset = self.ut.oneHotEncoding(dataset)
+        # dataset = self.ut.oneHotEncoding(dataset)
 
         # determine wich column is feature or label
         # X itu fitur
@@ -38,12 +38,18 @@ class ModelTrainer(object):
             # training and save into pickle
             # scenario 1
             # joblib.dump(clf,'model/scen1_train_where_halfidn.pkl')
-            joblib.dump(clf,'model/HO2_scen1_train_where_halfidn.pkl')
+            # joblib.dump(clf,'model/HO_scen1_train_where_halfidn.pkl')
+            # joblib.dump(clf,'model/3_scen1_train_where_halfidn.pkl')
+            # joblib.dump(clf,'model/HO2_scen1_train_where_halfidn.pkl')
             # # scenario 2
             # joblib.dump(clf,'model/scen2_train_where_fullidn.pkl')
+            # joblib.dump(clf,'model/HO_scen2_train_where_fullidn.pkl')
+            # joblib.dump(clf,'model/3_scen2_train_where_fullidn.pkl')
             # joblib.dump(clf,'model/HO2_scen2_train_where_fullidn.pkl')
             # # scenario 3
             # joblib.dump(clf,'model/scen3_train_where_default.pkl')
+            # joblib.dump(clf,'model/HO_scen3_train_where_default.pkl')
+            joblib.dump(clf,'model/3_scen3_train_where_default.pkl')
             # joblib.dump(clf,'model/HO2_scen3_train_where_default.pkl')
             # testing
             # joblib.dump(clf,'model/s2_testing_where.pkl')
@@ -51,13 +57,16 @@ class ModelTrainer(object):
 
             # scenario 1
             # self.ut.convertToExcel("./result/scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
-            self.ut.convertToExcel("./result/HO2_scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/HO_scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/HO2_scenario1_halfidn_WHERE_10fold.xlsx",result,"Sheet1")
             # scenario 2
-            # self.ut.convertToExcel("./result/scenario2_fullidn_WHERE_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/3_scenario2_fullidn_WHERE_10fold.xlsx",result,"Sheet1")
             # self.ut.convertToExcel("./result/HO2_scenario2_fullidn_WHERE_10fold.xlsx",result,"Sheet1")
             # scenario 3
-            # self.ut.convertToExcel("./result/scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
+            self.ut.convertToExcel("./result/3_scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
             # self.ut.convertToExcel("./result/HO2_scenario3_default_WHERE_10fold.xlsx",result,"Sheet1")
+
+
              # scenario testing
             # self.ut.convertToExcel("./result/s2_testing_WHERE_10fold.xlsx",result,"Sheet1")           
             print("Cross Validation for WHERE model has been saved to excel file!")
@@ -66,24 +75,32 @@ class ModelTrainer(object):
             # training and save into pickle
             # scenario 1
             # joblib.dump(clf,'model/scen1_train_who_halfidn.pkl')
-            joblib.dump(clf,'model/HO2_scen1_train_who_halfidn.pkl')
+            # joblib.dump(clf,'model/HO_scen1_train_who_halfidn.pkl')
+            # joblib.dump(clf,'model/3_scen1_train_who_halfidn.pkl')
+            # joblib.dump(clf,'model/HO2_scen1_train_who_halfidn.pkl')
             # # scenario 2
             # joblib.dump(clf,'model/scen2_train_who_fullidn.pkl')
+            # joblib.dump(clf,'model/HO_scen2_train_who_fullidn.pkl')
+            # joblib.dump(clf,'model/3_scen2_train_who_fullidn.pkl')
             # joblib.dump(clf,'model/HO2_scen2_train_who_fullidn.pkl')
             # # scenario 3
             # joblib.dump(clf,'model/scen3_train_who_default.pkl')
+            # joblib.dump(clf,'model/HO_scen3_train_who_default.pkl')
+            joblib.dump(clf,'model/3_scen3_train_who_default.pkl')
             # joblib.dump(clf,'model/HO2_scen3_train_who_default.pkl')
             # testing
             # joblib.dump(clf,'model/s2_testing_who.pkl')
             print ("Model for WHO has been saved")
 
             # scenario 1
-            self.ut.convertToExcel("./result/HO2_scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/HO_scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/HO2_scenario1_halfidn_WHO_10fold.xlsx",result,"Sheet1")
             # scenario 2
-            # self.ut.convertToExcel("./result/scenario2_fullidn_WHO_10fold.xlsx",result,"Sheet1")
+            # self.ut.convertToExcel("./result/3_scenario2_fullidn_WHO_10fold.xlsx",result,"Sheet1")
             # self.ut.convertToExcel("./result/HO2_scenario2_fullidn_WHO_10fold.xlsx",result,"Sheet1")
-            # # scenario 3
-            # self.ut.convertToExcel("./result/scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
+            # scenario 3
+            self.ut.convertToExcel("./result/3_scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
             # self.ut.convertToExcel("./result/HO2_scenario3_default_WHO_10fold.xlsx",result,"Sheet1")
 
              # scenario testing

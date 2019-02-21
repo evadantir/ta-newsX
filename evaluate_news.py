@@ -58,14 +58,14 @@ class EvaluateNews(object):
         temp['why'] = data['extracted'].apply(lambda x: x['why'])
 
         # scenario 1
-        # self.ut.convertToExcel("scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
+        # self.ut.convertToExcel("3_scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
         # self.ut.convertToExcel("HO_scen1_halfidn_evallocalnews.xlsx",temp,'Sheet1')
         # scenario 2
-        # self.ut.convertToExcel("scen2_fullidn_evallocalnews.xlsx",temp,'Sheet1')
+        # self.ut.convertToExcel("3_scen2_fullidn_evallocalnews.xlsx",temp,'Sheet1')
         # self.ut.convertToExcel("HO_scen2_fullidn_evallocalnews.xlsx",temp,'Sheet1')
         # scenario 3
-        self.ut.convertToExcel("scen3_default_evallocalnews.xlsx",temp,'Sheet1')
-        self.ut.convertToExcel("HO_scen3_default_evallocalnews.xlsx",temp,'Sheet1')
+        self.ut.convertToExcel("3_scen3_default_evallocalnews.xlsx",temp,'Sheet1')
+        # self.ut.convertToExcel("HO_scen3_default_evallocalnews.xlsx",temp,'Sheet1')
 
         print("Evaluating local news is done!")
 
@@ -90,24 +90,24 @@ class EvaluateNews(object):
 
         # # scenario 1
         # dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
-        # model_where = joblib.load('model/scen1_train_where_halfidn.pkl')
-        # model_who = joblib.load('model/scen1_train_who_halfidn.pkl')
+        # model_where = joblib.load('model/3_scen1_train_where_halfidn.pkl')
+        # model_who = joblib.load('model/3_scen1_train_who_halfidn.pkl')
 
         # scenario 2
         # dataset = pd.read_excel('scen2_fullidn_localfeature.xlsx', sheet_name='Sheet1')
-        # model_where = joblib.load('model/scen2_train_where_fullidn.pkl')
-        # model_who = joblib.load('model/scen2_train_who_fullidn.pkl')
+        # model_where = joblib.load('model/3_scen2_train_where_fullidn.pkl')
+        # model_who = joblib.load('model/3_scen2_train_who_fullidn.pkl')
 
         # # scenario 3
-        # dataset = pd.read_excel('scen3_default_localfeature.xlsx', sheet_name='Sheet1')
-        # model_where = joblib.load('model/scen3_train_where_default.pkl')
-        # model_who = joblib.load('model/scen3_train_who_default.pkl')
+        dataset = pd.read_excel('scen3_default_localfeature.xlsx', sheet_name='Sheet1')
+        model_where = joblib.load('model/3_scen3_train_where_default.pkl')
+        model_who = joblib.load('model/3_scen3_train_who_default.pkl')
 
         # scenario HO -------------------------------
         # # # scenario 1
-        dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
-        model_where = joblib.load('model/HO2_scen1_train_where_halfidn.pkl')
-        model_who = joblib.load('model/HO2_scen1_train_who_halfidn.pkl')
+        # dataset = pd.read_excel('scen1_halfidn_localfeature.xlsx', sheet_name='Sheet1')
+        # model_where = joblib.load('model/HO2_scen1_train_where_halfidn.pkl')
+        # model_who = joblib.load('model/HO2_scen1_train_who_halfidn.pkl')
 
         # scenario 2
         # dataset = pd.read_excel('scen2_fullidn_localfeature.xlsx', sheet_name='Sheet1')
@@ -135,7 +135,8 @@ class EvaluateNews(object):
         dataset = self.ut.convertToNumeric(dataset)
         
         dataset = dataset.drop(['entity',drop_element], axis=1)
-        dataset = self.ut.oneHotEncoding(dataset)
+        # !!! FOR ONE HOT ENCODING !!!
+        # dataset = self.ut.oneHotEncoding(dataset)
 
         # determine wich column is feature or label
         # X itu fitur

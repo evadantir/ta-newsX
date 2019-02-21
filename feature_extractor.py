@@ -33,7 +33,6 @@ class FeatureExtractor(object):
         # print(data)
         # looping in array of NER data
         for i in range(len(data)):
-            
             tempdict = {}
             if data[i][1] == 'PERSON':
                 per.append(data[i][0])
@@ -71,6 +70,112 @@ class FeatureExtractor(object):
                     list_loc.append(tempdict)
                     #empty temp array
                     loc = []
+
+        # remove duplicate item in list
+        list_loc = self.pre.removeDuplicateListDict(list_loc)
+        list_person = self.pre.removeDuplicateListDict(list_person)
+        list_org = self.pre.removeDuplicateListDict(list_org)
+
+        entities = list_loc + list_person + list_org
+        # print(entities)
+        # exit()
+        return entities
+
+    def extractBefEntity(self,data):
+        # list of extracted people,loc, organization entities from text
+        list_person = []
+        list_loc = []
+        list_org = []
+        dont_remove_punct = ".,'_"
+
+        # temporary variable for each people org and loc
+        per = []
+        org = []
+        loc = []
+        bef = None
+        # looping in array of NER data
+        for i in range(len(data)):
+            tempdict = {}
+            if data[i][1] == 'PERSON':
+                per.append(data[i][0])
+                if i != (len(data)-1):
+                    if (data[i+1][1] != 'PERSON'):
+                        bef = data[i-1][0]
+            elif data[i][1] == 'ORGANIZATION':
+                org.append(data[i][0])
+                if i != (len(data)-1):
+                    if  (data[i+1][1] != 'ORGANIZATION'):
+                        bef = data[i-1][0]
+            elif (data[i][1] == 'LOCATION') or (data[i][1] == 'COUNTRY') or (data[i][1] == 'CITY'):
+                loc.append(data[i][0])
+                if i != (len(data)-1):
+                    if (data[i+1][1] != 'LOCATION') or (data[i+1][1] != 'COUNTRY') or (data[i+1][1] != 'CITY'):
+                        bef = data[i-1][0]
+            else:
+                if per:
+                    # print(per)
+                    if bef:
+                        per.insert(0,bef)
+                        join_entity  =self.pre.remov_duplicates(per)
+                        filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                        # filter_punctuation = re.sub(r"(?<=\.\(\') ",r"",join_entity)
+                        tempdict["entity"] = filter_punctuation
+                        tempdict["type"] = "PERSON"
+                        list_person.append(tempdict)
+                        #empty temp array
+                        per = []
+                    else:
+                        join_entity = ' '.join(per)
+                        filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                        # filter_punctuation = re.sub(r"(?<=\.\(\') ",r"",join_entity)
+                        tempdict["entity"] = filter_punctuation
+                        tempdict["type"] = "PERSON"
+                        list_person.append(tempdict)
+                        #empty temp array
+                        per = []
+                elif org:
+                    # print(org)
+                    if bef:
+                        org.insert(0,bef)
+                        join_entity  =self.pre.remov_duplicates(org)
+                        # filter_punctuation = re.sub(r"(?<=\.\(\') ",r"",join_entity)
+                        filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                        tempdict["entity"] = filter_punctuation
+                        tempdict["type"] = "ORGANIZATION"
+                        list_org.append(tempdict)
+                        #empty temp array
+                        org = []
+                    else:
+                        join_entity = ' '.join(org)
+                        # filter_punctuation = re.sub(r"(?<=\.\(\') ",r"",join_entity)
+                        filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                        tempdict["entity"] = filter_punctuation
+                        tempdict["type"] = "ORGANIZATION"
+                        list_org.append(tempdict)
+                        #empty temp array
+                        org = []
+                    # print(org)
+
+                elif loc:
+                    # print(loc)
+                    if bef:
+                        loc.insert(0,bef)
+                        join_entity  =self.pre.remov_duplicates(loc)
+                        filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                        tempdict["entity"] = filter_punctuation
+                        tempdict["type"] = "LOCATION"
+                        list_loc.append(tempdict)
+                        #empty temp array
+                        loc = []
+                    else:
+                    # print(loc)
+                        join_entity = ' '.join(loc)
+                        filter_punctuation = re.sub(r"(?<=\W) ",r"",join_entity)
+                        tempdict["entity"] = filter_punctuation
+                        tempdict["type"] = "LOCATION"
+                        list_loc.append(tempdict)
+                        #empty temp array
+                        loc = []
 
         # remove duplicate item in list
         list_loc = self.pre.removeDuplicateListDict(list_loc)
